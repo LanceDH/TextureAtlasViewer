@@ -6,9 +6,9 @@
 	<Include file="libs\AceAddon-3.0\AceAddon-3.0.xml"/>
 	<Include file="libs\AceDB-3.0\AceDB-3.0.xml"/>
 
-	<Script file="AtlastTextureViewer.lua"/>
+	<Script file="TextureAtlasViewer.lua"/>
 	
-	<EditBox name="ATV_CopyBoxTemplate" inherits="InputBoxTemplate" virtual="true" autoFocus="false"> 
+	<EditBox name="TAV_CopyBoxTemplate" inherits="InputBoxTemplate" virtual="true" autoFocus="false"> 
 		<Size x="50" y="20"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -64,7 +64,7 @@
 		</Scripts>
 	</EditBox>
 	
-	<Button name="ATV_ListButtonTemplate" mixin="ATV_ListButtonMixin" virtual="true">
+	<Button name="TAV_ListButtonTemplate" mixin="TAV_ListButtonMixin" virtual="true">
 		<Size x="0" y="40"/>
 		<Anchors>
 			<Anchor point="LEFT"/>
@@ -92,7 +92,7 @@
 		</Scripts>
 	</Button>
 	
-	<Button name="ATV_AtlasFrameTemplate" mixin="ATV_AtlasFrameMixin" virtual="true" enableMouse="true">
+	<Button name="TAV_AtlasFrameTemplate" mixin="TAV_AtlasFrameMixin" virtual="true" enableMouse="true">
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture parentKey="Top" alpha="0.15">
@@ -144,7 +144,7 @@
 		</Scripts>
 	</Button>
 	
-	<Frame name="ATV_CoreFrame" inherits="BasicFrameTemplate" movable="true" parent="UIParent" clampedToScreen="true" hidden="true">
+	<Frame name="TAV_CoreFrame" inherits="BasicFrameTemplate" movable="true" parent="UIParent" clampedToScreen="true" hidden="true">
 		<Size x="1000" y="600" />
 		
 		<Anchors>
@@ -180,7 +180,7 @@
 								self:SetChecked(false);
 							</OnLoad>
 							<OnClick>
-								ATV_DisplayContainer:PatternCheckBoxOnClicK(self:GetChecked());
+								TAV_DisplayContainer:PatternCheckBoxOnClicK(self:GetChecked());
 							</OnClick>
 							<OnEnter> 
 								GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -232,7 +232,7 @@
 							</OnLeave>
 							<OnClick>
 								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-								ATV_DisplayContainer:SetImportOverlayShown(not ATV_DisplayContainer.Overlay:IsShown());
+								TAV_DisplayContainer:SetImportOverlayShown(not TAV_DisplayContainer.Overlay:IsShown());
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -246,12 +246,12 @@
 						</Anchors>
 						<Scripts>
 							<OnTextChanged inherit="prepend">
-								ATV_DisplayContainer:OnSearchChanged();
+								TAV_DisplayContainer:OnSearchChanged();
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
 				
-					<ScrollFrame name="ATV_ScrollFrame" parentKey="ScrollFrame" mixin="ATV_ScrollFrameMixin" inherits="HybridScrollFrameTemplate">
+					<ScrollFrame name="TAV_ScrollFrame" parentKey="ScrollFrame" mixin="TAV_ScrollFrameMixin" inherits="HybridScrollFrameTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="4" y="-32"/>
 							<Anchor point="BOTTOMRIGHT" x="-4" y="4" />
@@ -289,7 +289,7 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Frame name="ATV_DisplayContainer" parentKey="DisplayContainer" clipChildren="true" setAllPoints="true" mixin="ATV_DisplayContainerMixin" enableMouse="true">
+					<Frame name="TAV_DisplayContainer" parentKey="DisplayContainer" clipChildren="true" setAllPoints="true" mixin="TAV_DisplayContainerMixin" enableMouse="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="3" y="-3"/>
 							<Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
@@ -302,7 +302,7 @@
 								</Anchors>
 								
 								<Frames>
-									<EditBox parentKey="Link" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Link" inherits="TAV_CopyBoxTemplate">
 										<Size x="375" y="20"/>
 										<Anchors>
 											<Anchor point="CENTER"/>
@@ -316,7 +316,7 @@
 										</Anchors>
 										<Scripts>
 											<OnClick>
-												ATV_DisplayContainer:ClearDataButtonOnClick();
+												TAV_DisplayContainer:ClearDataButtonOnClick();
 											</OnClick>
 											<OnEnter>
 												GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -374,7 +374,7 @@
 								</Layers>
 							</Frame>
 							
-							<EditBox parentKey="FilePathBox" inherits="ATV_CopyBoxTemplate" frameLevel="10">
+							<EditBox parentKey="FilePathBox" inherits="TAV_CopyBoxTemplate" frameLevel="10">
 								<Size x="300" y="20"/>
 								<Anchors>
 									<Anchor point="BOTTOMLEFT" x="4"/>
@@ -547,7 +547,7 @@
 								</Scripts>
 							</Frame>
 							
-							<Frame name="ATV_InfoPanel" parentKey="InfoPanel" frameLevel="10" hidden="true">
+							<Frame name="TAV_InfoPanel" parentKey="InfoPanel" frameLevel="10" hidden="true">
 								<Size x="210" y="215"/>
 								<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 									<EdgeSize>
@@ -583,13 +583,13 @@
 										
 										<Scripts>
 											<OnClick>
-												ATV_DisplayContainer:HideAtlasInfo();
+												TAV_DisplayContainer:HideAtlasInfo();
 												PlaySound(857);
 											</OnClick>
 										</Scripts>
 									</Button>
 								
-									<EditBox parentKey="Name" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Name" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Atlas Name" type="string"/>
 										</KeyValues>
@@ -598,7 +598,7 @@
 											<Anchor point="RIGHT" x="-10"/>
 										</Anchors>
 									</EditBox>
-									<EditBox parentKey="Width" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Width" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Width" type="string"/>
 										</KeyValues>
@@ -607,7 +607,7 @@
 											<Anchor point="RIGHT" relativeKey="$parent.Name" relativePoint="BOTTOM" x="-5"/>
 										</Anchors>
 									</EditBox>
-									<EditBox parentKey="Height" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Height" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Height" type="string"/>
 										</KeyValues>
@@ -616,7 +616,7 @@
 											<Anchor point="LEFT" relativeKey="$parent.Name" relativePoint="BOTTOM" x="5"/>
 										</Anchors>
 									</EditBox>
-									<EditBox parentKey="Left" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Left" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Left" type="string"/>
 										</KeyValues>
@@ -625,7 +625,7 @@
 											<Anchor point="RIGHT" relativeKey="$parent.Width"/>
 										</Anchors>
 									</EditBox>
-									<EditBox parentKey="Right" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Right" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Right" type="string"/>
 										</KeyValues>
@@ -634,7 +634,7 @@
 											<Anchor point="LEFT" relativeKey="$parent.Height"/>
 										</Anchors>
 									</EditBox>
-									<EditBox parentKey="Top" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Top" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Top" type="string"/>
 										</KeyValues>
@@ -643,7 +643,7 @@
 											<Anchor point="RIGHT" relativeKey="$parent.Left"/>
 										</Anchors>
 									</EditBox>
-									<EditBox parentKey="Bottom" inherits="ATV_CopyBoxTemplate">
+									<EditBox parentKey="Bottom" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Bottom" type="string"/>
 										</KeyValues>

@@ -1,8 +1,8 @@
 ﻿
 local _addonName, _addon = ...;
 
-local ATV = LibStub("AceAddon-3.0"):NewAddon("AtlastTextureViewer");
-local ATV_Defaults = {
+local TAV = LibStub("AceAddon-3.0"):NewAddon("AtlastTextureViewer");
+local TAV_Defaults = {
 	["global"] = {	
 		["settings"] = {
 				["passiveBorders"] = true
@@ -17,8 +17,8 @@ local FORMAT_INVALID_TEXTURE = "No valid atlas info for %s\nNo texture size coul
 local DATA_URL = "https://www.townlong-yak.com/framexml/live/Helix/AtlasInfo.lua";
 local SAVE_VARIABLE_COPY_INFO = "Copy paste the list from " .. DATA_URL .. " here instead of this message. Make sure to include the opening and closing brackets.";
 
-function ATV:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("ATVDB", ATV_Defaults, true);
+function TAV:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("ATVDB", TAV_Defaults, true);
 	self.atlasInfo = self.db.global.AtlasInfo;
 	
 	if (not self.atlasInfo) then
@@ -29,12 +29,12 @@ function ATV:OnInitialize()
 	self.settings =  self.db.global.settings;
 end
 
-function ATV:OnEnable()
-	ATV_DisplayContainer:ApplySettings(self.settings);
+function TAV:OnEnable()
+	TAV_DisplayContainer:ApplySettings(self.settings);
 
 	-- No data imported yet
 	if(type(self.atlasInfo) == "string") then
-		ATV_DisplayContainer:SetImportOverlayShown(true, true);
+		TAV_DisplayContainer:SetImportOverlayShown(true, true);
 		return;
 	end
 
@@ -82,11 +82,11 @@ function ATV:OnEnable()
 		
 	-- Show first in the list
 	if (#self.filteredList > 0) then
-		ATV_DisplayContainer:DisplayTexture(self.filteredList[1].texture);
+		TAV_DisplayContainer:DisplayTexture(self.filteredList[1].texture);
 	end
 end
 
-function  ATV:ClearData()
+function  TAV:ClearData()
 	if (not self.displayList) then 
 		return false;
 	end
@@ -99,12 +99,12 @@ function  ATV:ClearData()
 	
 	self.atlasInfo = "";
 	
-	ATV_ScrollFrame:RefreshButtons();
+	TAV_ScrollFrame:RefreshButtons();
 	
 	return true;
 end
 
-function  ATV:GetSearchPriority(info, searchString, usePatterns)
+function  TAV:GetSearchPriority(info, searchString, usePatterns)
 	-- File name
 	if (info.name:lower():find(searchString, nil, not usePatterns)) then
 		return 1;
@@ -125,7 +125,7 @@ function  ATV:GetSearchPriority(info, searchString, usePatterns)
 	return 0;
 end
 
-function ATV:UpdateDisplayList(searchString, usePatterns)
+function TAV:UpdateDisplayList(searchString, usePatterns)
 	wipe(self.bufferList);
 	for k, info in ipairs(self.displayList) do
 		info.priority = self:GetSearchPriority(info, searchString, usePatterns);
@@ -154,32 +154,32 @@ function ATV:UpdateDisplayList(searchString, usePatterns)
 end
 
 -------------------------------------------------
--- ATV_ScrollFrameMixin
+-- TAV_ScrollFrameMixin
 -------------------------------------------------
 -- Init()
 -- RefreshButtons()
 -- OnShow()
 
-ATV_ScrollFrameMixin = {};
+TAV_ScrollFrameMixin = {};
 
-function ATV_ScrollFrameMixin:Init()
+function TAV_ScrollFrameMixin:Init()
 	if (self.initialized) then
 		return;
 	end
 
 	self.update =  self.RefreshButtons;
 	
-	HybridScrollFrame_CreateButtons(self, "ATV_ListButtonTemplate", 0, 0);
+	HybridScrollFrame_CreateButtons(self, "TAV_ListButtonTemplate", 0, 0);
 	HybridScrollFrame_SetDoNotHideScrollBar(self, true);
 	
 	self.initialized = true;
 end
 
-function ATV_ScrollFrameMixin:RefreshButtons()
+function TAV_ScrollFrameMixin:RefreshButtons()
 	local buttons = HybridScrollFrame_GetButtons(self);
 	local offset = HybridScrollFrame_GetOffset(self);
 	
-	local toDisplay = ATV.filteredList or {};
+	local toDisplay = TAV.filteredList or {};
 
 	for i = 1, #buttons do
 		local listIndex = offset + i;
@@ -201,13 +201,13 @@ function ATV_ScrollFrameMixin:RefreshButtons()
 	HybridScrollFrame_Update(self, totalHeight, displayedHeight);
 end
 
-function ATV_ScrollFrameMixin:OnShow()
+function TAV_ScrollFrameMixin:OnShow()
 	self:Init();
 	self:RefreshButtons();
 end
 
 -------------------------------------------------
--- ATV_DisplayContainerMixin
+-- TAV_DisplayContainerMixin
 -------------------------------------------------
 -- OnLoad()
 -- ApplySettings()
@@ -228,9 +228,9 @@ end
 -- ShowAtlasInfo(name, atlasInfo)
 -- SetImportOverlayShown(show, hideButtons)
 
-ATV_DisplayContainerMixin = {}
+TAV_DisplayContainerMixin = {}
 
-function ATV_DisplayContainerMixin:OnLoad()
+function TAV_DisplayContainerMixin:OnLoad()
 	self.currentScale = 1;
 	self.scaleMax = 2;
 	self.scaleMin = 0.3;
@@ -240,7 +240,7 @@ function ATV_DisplayContainerMixin:OnLoad()
 	
 	self.AlertIndicator.dataIssues = {};
 	
-	self.overlayPool = CreateFramePool("BUTTON", self.Child, "ATV_AtlasFrameTemplate");
+	self.overlayPool = CreateFramePool("BUTTON", self.Child, "TAV_AtlasFrameTemplate");
 	self:RegisterForDrag("LeftButton");
 	
 	self.backgroundColor = CreateColor(.25, .25, .25, 1);
@@ -260,8 +260,8 @@ function ATV_DisplayContainerMixin:OnLoad()
 To do so, follow these steps:
   1. Log out of your character. This is important!
   2. Go into your saved variables folder.
-       (WoW/WTF/Account/<Account name>/SavedVariables)
-  3. Open the file AtlastTextureViewer.lua in a text editor.
+       (WoW/WTF/Account/<Your Account>/SavedVariables)
+  3. Open the file TextureAtlasViewer.lua in a text editor.
   4. There you will find the variable ["AtlasInfo"] =.
   5. Visit the following URL:]]
 	self.Overlay.InfoBefore:SetText(before);
@@ -276,17 +276,17 @@ To update your data in the future, follow the same steps.]]
 	self.Overlay.InfoAfter:SetText(after);
 end
 
-function ATV_DisplayContainerMixin:ApplySettings(settings)
+function TAV_DisplayContainerMixin:ApplySettings(settings)
 	self.ToggleBordersButton.Icon:SetTexture(settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
 	self:SetBackgroundColor(settings.backgroundColor.r, settings.backgroundColor.g, settings.backgroundColor.b, settings.backgroundColor.a)
 end
 
-function ATV_DisplayContainerMixin:OnSearchChanged()
-	local searchBox = ATV_CoreFrame.LeftInset.SearchBox;
+function TAV_DisplayContainerMixin:OnSearchChanged()
+	local searchBox = TAV_CoreFrame.LeftInset.SearchBox;
 	local text = searchBox:GetText() or "";
 
 	text = text:lower();
-	if not pcall(function() ATV:UpdateDisplayList(text, self.enablePatterns) end) then 
+	if not pcall(function() TAV:UpdateDisplayList(text, self.enablePatterns) end) then 
 		searchBox:SetTextColor(1, 0.25, 0.25, 1);
 		return; 
 	else
@@ -294,37 +294,37 @@ function ATV_DisplayContainerMixin:OnSearchChanged()
 	end
 
 	self.searchString = text;
-	ATV_ScrollFrame:RefreshButtons();
+	TAV_ScrollFrame:RefreshButtons();
 	
-	ATV_DisplayContainer:UpdateOverlays();
+	TAV_DisplayContainer:UpdateOverlays();
 end
 
-function ATV_DisplayContainerMixin:ClearDataButtonOnClick()
-	if (not ATV:ClearData()) then return; end
+function TAV_DisplayContainerMixin:ClearDataButtonOnClick()
+	if (not TAV:ClearData()) then return; end
 	PlaySound(857);
 	self:DisplayTexture();
 	self:SetImportOverlayShown(true, true);
 end
 
-function ATV_DisplayContainerMixin:NameMatchesCurrentSearch(name)
+function TAV_DisplayContainerMixin:NameMatchesCurrentSearch(name)
 	if (not name or not self.searchString or self.searchString == "") then return false; end
 	
 	return name:lower():find(self.searchString, nil, not self.enablePatterns);
 end
 
-function ATV_DisplayContainerMixin:PatternCheckBoxOnClicK(value)
+function TAV_DisplayContainerMixin:PatternCheckBoxOnClicK(value)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 	self.enablePatterns = value;
 	self:OnSearchChanged();
 end
 
-function ATV_DisplayContainerMixin:ToggleBorders()
-	ATV.settings.passiveBorders = not ATV.settings.passiveBorders;
-	self.ToggleBordersButton.Icon:SetTexture(ATV.settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
+function TAV_DisplayContainerMixin:ToggleBorders()
+	TAV.settings.passiveBorders = not TAV.settings.passiveBorders;
+	self.ToggleBordersButton.Icon:SetTexture(TAV.settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
 	self:UpdateOverlays();
 end
 
-function ATV_DisplayContainerMixin:BackgroundButtonOnClick()
+function TAV_DisplayContainerMixin:BackgroundButtonOnClick()
 	local info = self.BGColorButton.info;
 	if (info) then
 		info.r, info.g, info.b = self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b;
@@ -333,16 +333,16 @@ function ATV_DisplayContainerMixin:BackgroundButtonOnClick()
 	end
 end
 
-function ATV_DisplayContainerMixin:SetBackgroundColor(r, g, b, a)
+function TAV_DisplayContainerMixin:SetBackgroundColor(r, g, b, a)
 	self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b, self.backgroundColor.a = r, g, b, a;
 	self.BGColorButton.Preview:SetColorTexture(r, g, b, 1);
 	self.Child.Background:SetColorTexture(r, g, b, a);
 	
-	local savedBGColor = ATV.settings.backgroundColor;
+	local savedBGColor = TAV.settings.backgroundColor;
 	savedBGColor.r, savedBGColor.g, savedBGColor.b, savedBGColor.a = r, g, b, a;
 end
 
-function ATV_DisplayContainerMixin:Reset()
+function TAV_DisplayContainerMixin:Reset()
 	self.currentScale = 1;
 	self.Child:SetSize(self.width, self.height);
 	self.Child:ClearAllPoints();
@@ -350,7 +350,7 @@ function ATV_DisplayContainerMixin:Reset()
 	self:CreateOverlays();
 end
 
-function ATV_DisplayContainerMixin:UpdateOverlays()
+function TAV_DisplayContainerMixin:UpdateOverlays()
 	-- Keep the overlays, but change their appearences
 	for overlay in self.overlayPool:EnumerateActive() do
 		overlay:UpdateColor();
@@ -358,10 +358,10 @@ function ATV_DisplayContainerMixin:UpdateOverlays()
 	end
 end
 
-function ATV_DisplayContainerMixin:CreateOverlays()
+function TAV_DisplayContainerMixin:CreateOverlays()
 	-- Recreate all the overlays completely
 	self.overlayPool:ReleaseAll();
-	local atlasNames = ATV.atlasInfo[self.texture];
+	local atlasNames = TAV.atlasInfo[self.texture];
 	if (not atlasNames) then return; end
 	
 	for k, name in ipairs(atlasNames) do
@@ -375,7 +375,7 @@ function ATV_DisplayContainerMixin:CreateOverlays()
 	end
 end
 
-function ATV_DisplayContainerMixin:DisplayTexture(texture)
+function TAV_DisplayContainerMixin:DisplayTexture(texture)
 	if (self.texture == texture) then return; end
 	self.texture = texture;
 	self.width = 256;
@@ -385,7 +385,7 @@ function ATV_DisplayContainerMixin:DisplayTexture(texture)
 	
 	if (not texture) then return; end
 	
-	local atlasNames = ATV.atlasInfo[texture];
+	local atlasNames = TAV.atlasInfo[texture];
 	if (not atlasNames or #atlasNames == 0) then 
 		return;
 	end
@@ -422,7 +422,7 @@ function ATV_DisplayContainerMixin:DisplayTexture(texture)
 	self:SetImportOverlayShown(false);
 end
 
-function ATV_DisplayContainerMixin:OnMouseWheel(delta)
+function TAV_DisplayContainerMixin:OnMouseWheel(delta)
 	if (self.isDragging) then return; end
 	-- Calculate the original normalized position of the container's center on the child frame
 	local centerX, centerY = self:GetCenter();
@@ -446,7 +446,7 @@ function ATV_DisplayContainerMixin:OnMouseWheel(delta)
 	end
 end
 
-function ATV_DisplayContainerMixin:OnDragStart()
+function TAV_DisplayContainerMixin:OnDragStart()
 	if (not self.Child:IsShown()) then return; end
 
 	self.Child:StartMoving();
@@ -454,7 +454,7 @@ function ATV_DisplayContainerMixin:OnDragStart()
 	self.isDragging = true;
 end
 
-function ATV_DisplayContainerMixin:OnDragStop()
+function TAV_DisplayContainerMixin:OnDragStop()
 	if (not self.isDragging) then return; end
 	
 	self.Child:StopMovingOrSizing();
@@ -469,46 +469,46 @@ function ATV_DisplayContainerMixin:OnDragStop()
 	end
 end
 
-function ATV_DisplayContainerMixin:HideAtlasInfo()
-	ATV_InfoPanel:Hide();
+function TAV_DisplayContainerMixin:HideAtlasInfo()
+	TAV_InfoPanel:Hide();
 	self.selectedAtlas = nil;
 	self:UpdateOverlays();
 end
 
-function ATV_DisplayContainerMixin:ShowAtlasInfo(name, atlasInfo)
+function TAV_DisplayContainerMixin:ShowAtlasInfo(name, atlasInfo)
 	if (not name or not atlasInfo) then return; end
 	
-	ATV_InfoPanel.Name:SetText(name);
-	ATV_InfoPanel.Width:SetText(atlasInfo.width);
-	ATV_InfoPanel.Height:SetText(atlasInfo.height);
-	ATV_InfoPanel.Left:SetText(atlasInfo.leftTexCoord);
-	ATV_InfoPanel.Right:SetText(atlasInfo.rightTexCoord);
-	ATV_InfoPanel.Top:SetText(atlasInfo.topTexCoord);
-	ATV_InfoPanel.Bottom:SetText(atlasInfo.bottomTexCoord);
-	ATV_InfoPanel.IconHorizontalTile:SetAtlas(atlasInfo.tilesHorizontally and "ParagonReputation_Checkmark" or "communities-icon-redx")
-	ATV_InfoPanel.IconVerticalTile:SetAtlas(atlasInfo.tilesVertically and "ParagonReputation_Checkmark" or "communities-icon-redx")
-	ATV_InfoPanel:Show();
+	TAV_InfoPanel.Name:SetText(name);
+	TAV_InfoPanel.Width:SetText(atlasInfo.width);
+	TAV_InfoPanel.Height:SetText(atlasInfo.height);
+	TAV_InfoPanel.Left:SetText(atlasInfo.leftTexCoord);
+	TAV_InfoPanel.Right:SetText(atlasInfo.rightTexCoord);
+	TAV_InfoPanel.Top:SetText(atlasInfo.topTexCoord);
+	TAV_InfoPanel.Bottom:SetText(atlasInfo.bottomTexCoord);
+	TAV_InfoPanel.IconHorizontalTile:SetAtlas(atlasInfo.tilesHorizontally and "ParagonReputation_Checkmark" or "communities-icon-redx")
+	TAV_InfoPanel.IconVerticalTile:SetAtlas(atlasInfo.tilesVertically and "ParagonReputation_Checkmark" or "communities-icon-redx")
+	TAV_InfoPanel:Show();
 end
 
-function ATV_DisplayContainerMixin:SetImportOverlayShown(show, hideButtons)
-	if (not show and (not ATV.displayList or #ATV.displayList == 0)) then
+function TAV_DisplayContainerMixin:SetImportOverlayShown(show, hideButtons)
+	if (not show and (not TAV.displayList or #TAV.displayList == 0)) then
 		return;
 	end
 	self.Overlay:SetShown(show);
 
 	self.Overlay.ClearDataButton:SetShown(not hideButtons);
-	ATV_CoreFrame.LeftInset.InfoButton:SetShown(not hideButtons);
+	TAV_CoreFrame.LeftInset.InfoButton:SetShown(not hideButtons);
 end
 
 -------------------------------------------------
--- ATV_ListButtonMixin
+-- TAV_ListButtonMixin
 -------------------------------------------------
 -- Update(info)
 -- OnClick()
 
-ATV_ListButtonMixin = {};
+TAV_ListButtonMixin = {};
 
-function ATV_ListButtonMixin:Update(info)
+function TAV_ListButtonMixin:Update(info)
 	self.texture = info.texture;
 	self:Show();
 	self.Text:SetText(info.display);
@@ -523,14 +523,14 @@ function ATV_ListButtonMixin:Update(info)
 	self.SelectedOverlay:SetShown(self.texture == self:GetParent().selected);
 end
 
-function ATV_ListButtonMixin:OnClick()
-	ATV_DisplayContainer:DisplayTexture(self.texture);
+function TAV_ListButtonMixin:OnClick()
+	TAV_DisplayContainer:DisplayTexture(self.texture);
 	self:GetParent().selected = self.texture;
 	self:GetParent():GetParent():RefreshButtons();
 end
 
 -------------------------------------------------
--- ATV_AtlasFrameMixin
+-- TAV_AtlasFrameMixin
 -------------------------------------------------
 -- OnLoad()
 -- SetBorderHighlighted(value)
@@ -544,14 +544,14 @@ end
 -- Init(name, info)
 -- 
 
-ATV_AtlasFrameMixin = {};
+TAV_AtlasFrameMixin = {};
 
-function ATV_AtlasFrameMixin:OnLoad()
+function TAV_AtlasFrameMixin:OnLoad()
 	self:RegisterForDrag("LeftButton");
 end
 
-function ATV_AtlasFrameMixin:SetBorderHighlighted(value)
-	local alpha = ATV.settings.passiveBorders and 0.15 or 0;
+function TAV_AtlasFrameMixin:SetBorderHighlighted(value)
+	local alpha = TAV.settings.passiveBorders and 0.15 or 0;
 	alpha = value and 0.5 or alpha;
 	
 	self.Top:SetAlpha(alpha);
@@ -560,20 +560,20 @@ function ATV_AtlasFrameMixin:SetBorderHighlighted(value)
 	self.Right:SetAlpha(alpha);
 end
 
-function ATV_AtlasFrameMixin:OnClick()
-	ATV_DisplayContainer.selectedAtlas = self.name;
-	ATV_DisplayContainer:ShowAtlasInfo(self.name, self.info);
-	ATV_DisplayContainer:UpdateOverlays();
+function TAV_AtlasFrameMixin:OnClick()
+	TAV_DisplayContainer.selectedAtlas = self.name;
+	TAV_DisplayContainer:ShowAtlasInfo(self.name, self.info);
+	TAV_DisplayContainer:UpdateOverlays();
 	PlaySound(857);
 end
 
-function ATV_AtlasFrameMixin:OnEnter()
+function TAV_AtlasFrameMixin:OnEnter()
 	if (self:GetParent():GetParent().isDragging) then
 		return;
 	end
 	-- Calculate the offset so the tooltip is always positioned inside the container
-	local offsetX = max(0, self:GetRight() - ATV_DisplayContainer:GetRight());
-	local offsetY = max(0, self:GetTop() - ATV_DisplayContainer:GetTop());
+	local offsetX = max(0, self:GetRight() - TAV_DisplayContainer:GetRight());
+	local offsetY = max(0, self:GetTop() - TAV_DisplayContainer:GetTop());
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -offsetX, -offsetY);
 	GameTooltip:SetText(self.name or "Unknown", 1, 1, 1, nil, true);
 	GameTooltip:Show();
@@ -581,27 +581,27 @@ function ATV_AtlasFrameMixin:OnEnter()
 	self:SetBorderHighlighted(true);
 end
 
-function ATV_AtlasFrameMixin:OnLeave()
+function TAV_AtlasFrameMixin:OnLeave()
 	GameTooltip:Hide();
 	self:GetParent():GetParent().mousedOverFrame = nil;
 	self:SetBorderHighlighted(self.shouldHighlight);
 end
 
-function ATV_AtlasFrameMixin:OnDragStart()
-	ATV_DisplayContainer:OnDragStart();
+function TAV_AtlasFrameMixin:OnDragStart()
+	TAV_DisplayContainer:OnDragStart();
 end
 
-function ATV_AtlasFrameMixin:OnDragStop()
-	ATV_DisplayContainer:OnDragStop();
+function TAV_AtlasFrameMixin:OnDragStop()
+	TAV_DisplayContainer:OnDragStop();
 end
 
-function ATV_AtlasFrameMixin:UpdateColor()
+function TAV_AtlasFrameMixin:UpdateColor()
 	local color = WHITE_FONT_COLOR;
 	self.shouldHighlight = false;
-	if(self.name == ATV_DisplayContainer.selectedAtlas) then
+	if(self.name == TAV_DisplayContainer.selectedAtlas) then
 		color = YELLOW_FONT_COLOR;
 		self.shouldHighlight = true;
-	elseif (ATV_DisplayContainer:NameMatchesCurrentSearch(self.name)) then
+	elseif (TAV_DisplayContainer:NameMatchesCurrentSearch(self.name)) then
 		color = GREEN_FONT_COLOR;
 		self.shouldHighlight = true;
 	end
@@ -614,7 +614,7 @@ function ATV_AtlasFrameMixin:UpdateColor()
 	self.Highlight:SetVertexColor(color:GetRGB());
 end
 
-function ATV_AtlasFrameMixin:UpdatePosition()
+function TAV_AtlasFrameMixin:UpdatePosition()
 	local info = self.info;
 	local parent = self:GetParent()
 	local width, height = parent:GetSize();
@@ -622,7 +622,7 @@ function ATV_AtlasFrameMixin:UpdatePosition()
 	self:SetPoint("BOTTOMRIGHT", parent, -(1 - info.rightTexCoord) * width, (1-info.bottomTexCoord) * height);
 end
 
-function ATV_AtlasFrameMixin:Init(name, info)
+function TAV_AtlasFrameMixin:Init(name, info)
 	if(not name or not info) then return; end
 
 	self.name = name;
@@ -636,11 +636,11 @@ end
 -- Slash Command
 -------------------------------------------------
 
-SLASH_ATVSLASH1 = '/atv';
+SLASH_ATVSLASH1 = '/TAV';
 local function slashcmd()
 	if (InCombatLockdown()) then return; end
 
-	ATV_CoreFrame:Show();
+	TAV_CoreFrame:Show();
 end
 SlashCmdList["ATVSLASH"] = slashcmd
 
