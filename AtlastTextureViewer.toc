@@ -1,0 +1,9 @@
+﻿## Interface: 80205
+## Title: AtlastTextureViewer
+## Notes: An interactive viewer to find atlases from textures.
+## Author: LanceDH
+## Version: 8.2.01
+## SavedVariables: ATVDB
+
+AtlastTextureViewer.xml
+
