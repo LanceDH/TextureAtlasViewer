@@ -45,14 +45,15 @@
 			<OnEnterPressed>
 				self:ClearFocus();
 			</OnEnterPressed>
-			<OnKeyUp>
+			<OnKeyDown>
 				if (IsControlKeyDown() and (key == "C" or key == "X")) then
 					self.CheckAnim:Stop();
-					self:ClearFocus();
 					self.CheckAnim:Play();
 					PlaySound(SOUNDKIT.TUTORIAL_POPUP);
+					<!-- Delay until next frame or it will prevent the actual copy -->
+					C_Timer.After(0, function() self:ClearFocus(); end);
 				end
-			</OnKeyUp>
+			</OnKeyDown>
 			<OnTextChanged>
 				if (userInput) then
 					self:SetText(self.contentString or "");
@@ -712,7 +713,7 @@
 		<Scripts>
 			<OnLoad>
 				self:RegisterForDrag("LeftButton");
-				self.TitleText:SetText("Atlas Texture Viewer");
+				self.TitleText:SetText("Texture Atlas Viewer");
 				self:RegisterEvent("PLAYER_REGEN_DISABLED");
 			</OnLoad>
 			<OnEvent>

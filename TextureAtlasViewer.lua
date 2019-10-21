@@ -232,8 +232,8 @@ TAV_DisplayContainerMixin = {}
 
 function TAV_DisplayContainerMixin:OnLoad()
 	self.currentScale = 1;
-	self.scaleMax = 2;
-	self.scaleMin = 0.3;
+	self.scaleMax = 3;
+	self.scaleMin = 0.1;
 	self.scaleStep = 0.1;
 	self.width = 100;
 	self.height = 100;
@@ -636,11 +636,12 @@ end
 -- Slash Command
 -------------------------------------------------
 
-SLASH_ATVSLASH1 = '/TAV';
+SLASH_TAVSLASH1 = '/tav';
+SLASH_TAVSLASH2 = '/textureatlasviewer';
 local function slashcmd()
 	if (InCombatLockdown()) then return; end
 
 	TAV_CoreFrame:Show();
 end
-SlashCmdList["ATVSLASH"] = slashcmd
+SlashCmdList["TAVSLASH"] = slashcmd
 
