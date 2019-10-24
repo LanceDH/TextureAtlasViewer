@@ -292,8 +292,8 @@
 				<Frames>
 					<Frame name="TAV_DisplayContainer" parentKey="DisplayContainer" clipChildren="true" setAllPoints="true" mixin="TAV_DisplayContainerMixin" enableMouse="true">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="3" y="-3"/>
-							<Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
+							<Anchor point="TOPLEFT" x="4" y="-4"/>
+							<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
 						</Anchors>
 						<Frames>
 							<Frame parentKey="Overlay" frameLevel="20" enableMouse="true" hidden="true">
@@ -375,156 +375,259 @@
 								</Layers>
 							</Frame>
 							
-							<EditBox parentKey="FilePathBox" inherits="TAV_CopyBoxTemplate" frameLevel="10">
-								<Size x="300" y="20"/>
+							<Frame name="TAV_ControlsPanel" parentKey="ControlsPanel" frameLevel="10">
+								<Size x="312" y="50"/>
 								<Anchors>
-									<Anchor point="BOTTOMLEFT" x="4"/>
-								</Anchors>
-							</EditBox>
-							
-							<Button parentKey="BGColorButton" movable="true" frameLevel="10">
-								<Size x="23" y="22"/>
-								<Anchors>
-									<Anchor point="BOTTOMLEFT" relativeKey="$parent.FilePathBox" relativePoint="TOPLEFT" x="-3" y="1"/>
+									<Anchor point="BOTTOMLEFT"/>
 								</Anchors>
 								<Layers>
-									<Layer level="OVERLAY" textureSubLevel="-1">
-										<Texture parentKey="BG">
-											<Size x="13" y="12"/>
+									<Layer level="BACKGROUND" textureSubLevel="-1">
+										<Texture parentKey="TR1" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Size x="6" y="6"/>
 											<Anchors>
-												<Anchor point="CENTER"/>
+												<Anchor point="TOPRIGHT" x="-100"/>
 											</Anchors>
-											<Color r="1" g="1" b="1" a="1"/>
+											<TexCoords left="0.71875" right="1" top="0" bottom="0.28125"/>
 										</Texture>
-									</Layer>
-									<Layer level="OVERLAY">
-										<Texture parentKey="Preview">
-											<Size x="11" y="10"/>
+										<Texture parentKey="T1" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
 											<Anchors>
-												<Anchor point="CENTER"/>
+												<Anchor point="TOPLEFT"/>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.TR1" relativePoint="BOTTOMLEFT"/>
 											</Anchors>
-											<Color r="1" g="0" b="1" a="0.75"/>
+											<TexCoords left="0.28125" right="0.71875" top="0" bottom="0.28125"/>
+										</Texture>
+										<Texture parentKey="R1" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.TR1" y="-19"/>
+												<Anchor point="TOPLEFT" relativeKey="$parent.TR1" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+											<TexCoords left="0.71875" right="1" top="0.28125" bottom="0.71875"/>
+										</Texture>
+										<Texture parentKey="C1" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMLEFT"/>
+												<Anchor point="TOPRIGHT" relativeKey="$parent.TR1" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+											<TexCoords left="0.28125" right="0.71875" top="0.28125" bottom="0.71875"/>
+										</Texture>
+										
+										
+										
+										<Texture parentKey="MC" alpha="0.65">
+											<Size x="3" y="3"/>
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.R1" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+											<Color r="0" g="0" b="0"/>
+										</Texture>
+										
+										<Texture parentKey="TR2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Size x="6" y="6"/>
+											<Anchors>
+												<Anchor point="RIGHT" />
+												<Anchor point="BOTTOM" relativeKey="$parent.MC"/>
+											</Anchors>
+											<TexCoords left="0.71875" right="1" top="0" bottom="0.28125"/>
+										</Texture>
+										<Texture parentKey="T2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMLEFT" relativeKey="$parent.MC" relativePoint="BOTTOMRIGHT"/>
+												<Anchor point="TOPRIGHT" relativeKey="$parent.TR2" relativePoint="TOPLEFT"/>
+											</Anchors>
+											<TexCoords left="0.28125" right="0.71875" top="0" bottom="0.28125"/>
+										</Texture>
+										<Texture parentKey="R2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMRIGHT"/>
+												<Anchor point="TOPLEFT" relativeKey="$parent.TR2" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+											<TexCoords left="0.71875" right="1" top="0.28125" bottom="0.71875"/>
+										</Texture>
+										<Texture parentKey="C2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.R2" relativePoint="BOTTOMLEFT"/>
+												<Anchor point="TOPLEFT" relativeKey="$parent.MC" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+											<TexCoords left="0.28125" right="0.71875" top="0.28125" bottom="0.71875"/>
 										</Texture>
 									</Layer>
 								</Layers>
-								
-								<NormalTexture atlas="chatframe-button-up"/>
-								<PushedTexture atlas="chatframe-button-down"/>
-								<HighlightTexture atlas="chatframe-button-highlight" alphaMode="ADD"/>
-								
-								<Scripts>
-									<OnClick>
-										self:GetParent():BackgroundButtonOnClick();
-										PlaySound(857);
-									</OnClick>
-									<OnMouseDown>
-										self.BG:SetPoint("CENTER", -1, -1);
-										self.Preview:SetPoint("CENTER", -1, -1);
-									</OnMouseDown>
-									<OnMouseUp>
-										self.BG:SetPoint("CENTER", 0, 0);
-										self.Preview:SetPoint("CENTER", 0, 0);
-									</OnMouseUp>
-									<OnEnter>
-										GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-										GameTooltip:SetText("Change Background Color", 1, 1, 1, nil, true);
-										GameTooltip:Show();
-									</OnEnter>
-									<OnLeave>
-										GameTooltip:Hide();
-									</OnLeave>
-								</Scripts>
-							</Button>
-							
-							<Button parentKey="ToggleBordersButton" movable="true" frameLevel="10">
-								<Size x="23" y="22"/>
-								<Anchors>
-									<Anchor point="LEFT" relativeKey="$parent.BGColorButton" relativePoint="RIGHT" x="1"/>
-								</Anchors>
-								<Layers>
-									<Layer level="OVERLAY">
-										<Texture parentKey="Icon" file="Interface\LFGFRAME\BattlenetWorking9">
-											<Size x="17" y="16"/>
-											<Anchors>
-												<Anchor point="CENTER"/>
-											</Anchors>
-											<TexCoords left="0.15" right="0.85" top="0.15" bottom="0.85"/>
-										</Texture>
-									</Layer>
-								</Layers>
-								
-								<NormalTexture atlas="chatframe-button-up"/>
-								<PushedTexture atlas="chatframe-button-down"/>
-								<HighlightTexture atlas="chatframe-button-highlight" alphaMode="ADD"/>
-								
-								<Scripts>
-									<OnClick>
-										self:GetParent():ToggleBorders();
-										PlaySound(857);
-									</OnClick>
-									<OnMouseDown>
-										self.Icon:SetPoint("CENTER", -1, -1);
-									</OnMouseDown>
-									<OnMouseUp>
-										self.Icon:SetPoint("CENTER", 0, 0);
-									</OnMouseUp>
-									<OnEnter>
-										GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-										GameTooltip:SetText("Toggle Passive Borders", 1, 1, 1, nil, true);
-										GameTooltip:Show();
-									</OnEnter>
-									<OnLeave>
-										GameTooltip:Hide();
-									</OnLeave>
-								</Scripts>
-							</Button>
-							
-							<Button parentKey="ResetPositionButton" movable="true" frameLevel="10">
-								<Size x="23" y="22"/>
-								<Anchors>
-									<Anchor point="LEFT" relativeKey="$parent.ToggleBordersButton" relativePoint="RIGHT" x="1"/>
-								</Anchors>
-								<Layers>
-									<Layer level="OVERLAY">
-										<Texture parentKey="Icon" atlas="transmog-icon-revert-small">
-											<Size x="17" y="16"/>
-											<Anchors>
-												<Anchor point="CENTER"/>
-											</Anchors>
-										</Texture>
-									</Layer>
-								</Layers>
-								
-								<NormalTexture atlas="chatframe-button-up"/>
-								<PushedTexture atlas="chatframe-button-down"/>
-								<HighlightTexture atlas="chatframe-button-highlight" alphaMode="ADD"/>
-								
-								<Scripts>
-									<OnClick>
-										self:GetParent():Reset();
-										PlaySound(857);
-									</OnClick>
-									<OnMouseDown>
-										self.Icon:SetPoint("CENTER", -1, -1);
-									</OnMouseDown>
-									<OnMouseUp>
-										self.Icon:SetPoint("CENTER", 0, 0);
-									</OnMouseUp>
-									<OnEnter>
-										GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-										GameTooltip:SetText("Reset Positon And Scale", 1, 1, 1, nil, true);
-										GameTooltip:Show();
-									</OnEnter>
-									<OnLeave>
-										GameTooltip:Hide();
-									</OnLeave>
-								</Scripts>
-							</Button>
+								<Frames>
+									<EditBox parentKey="FilePathBox" inherits="TAV_CopyBoxTemplate">
+										<Size x="300" y="20"/>
+										<Anchors>
+											<Anchor point="BOTTOMLEFT" x="6" y="2"/>
+										</Anchors>
+									</EditBox>
+									
+									<Button parentKey="BGColorButton" movable="true">
+										<Size x="23" y="22"/>
+										<Anchors>
+											<Anchor point="BOTTOMLEFT" relativeKey="$parent.FilePathBox" relativePoint="TOPLEFT" x="-6" y="1"/>
+										</Anchors>
+										<Layers>
+											<Layer level="OVERLAY" textureSubLevel="-1">
+												<Texture parentKey="BG">
+													<Size x="13" y="12"/>
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Color r="1" g="1" b="1" a="1"/>
+												</Texture>
+											</Layer>
+											<Layer level="OVERLAY">
+												<Texture parentKey="Preview">
+													<Size x="11" y="10"/>
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Color r="1" g="0" b="1" a="0.75"/>
+												</Texture>
+											</Layer>
+										</Layers>
+										
+										<NormalTexture atlas="chatframe-button-up"/>
+										<PushedTexture atlas="chatframe-button-down"/>
+										<HighlightTexture atlas="chatframe-button-highlight" alphaMode="ADD"/>
+										
+										<Scripts>
+											<OnClick>
+												self:GetParent():GetParent():BackgroundButtonOnClick();
+												PlaySound(857);
+											</OnClick>
+											<OnMouseDown>
+												self.BG:SetPoint("CENTER", -1, -1);
+												self.Preview:SetPoint("CENTER", -1, -1);
+											</OnMouseDown>
+											<OnMouseUp>
+												self.BG:SetPoint("CENTER", 0, 0);
+												self.Preview:SetPoint("CENTER", 0, 0);
+											</OnMouseUp>
+											<OnEnter>
+												GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+												GameTooltip:SetText("Change Background Color", 1, 1, 1, nil, true);
+												GameTooltip:Show();
+											</OnEnter>
+											<OnLeave>
+												GameTooltip:Hide();
+											</OnLeave>
+										</Scripts>
+									</Button>
+									
+									<Button parentKey="ToggleBordersButton" movable="true">
+										<Size x="23" y="22"/>
+										<Anchors>
+											<Anchor point="LEFT" relativeKey="$parent.BGColorButton" relativePoint="RIGHT" x="1"/>
+										</Anchors>
+										<Layers>
+											<Layer level="OVERLAY">
+												<Texture parentKey="Icon" file="Interface\LFGFRAME\BattlenetWorking9">
+													<Size x="17" y="16"/>
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<TexCoords left="0.15" right="0.85" top="0.15" bottom="0.85"/>
+												</Texture>
+											</Layer>
+										</Layers>
+										
+										<NormalTexture atlas="chatframe-button-up"/>
+										<PushedTexture atlas="chatframe-button-down"/>
+										<HighlightTexture atlas="chatframe-button-highlight" alphaMode="ADD"/>
+										
+										<Scripts>
+											<OnClick>
+												self:GetParent():GetParent():ToggleBorders();
+												PlaySound(857);
+											</OnClick>
+											<OnMouseDown>
+												self.Icon:SetPoint("CENTER", -1, -1);
+											</OnMouseDown>
+											<OnMouseUp>
+												self.Icon:SetPoint("CENTER", 0, 0);
+											</OnMouseUp>
+											<OnEnter>
+												GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+												GameTooltip:SetText("Toggle Passive Borders", 1, 1, 1, nil, true);
+												GameTooltip:Show();
+											</OnEnter>
+											<OnLeave>
+												GameTooltip:Hide();
+											</OnLeave>
+										</Scripts>
+									</Button>
+									
+									<Button parentKey="ResetPositionButton" movable="true">
+										<Size x="23" y="22"/>
+										<Anchors>
+											<Anchor point="LEFT" relativeKey="$parent.ToggleBordersButton" relativePoint="RIGHT" x="1"/>
+										</Anchors>
+										<Layers>
+											<Layer level="OVERLAY">
+												<Texture parentKey="Icon" atlas="transmog-icon-revert-small">
+													<Size x="17" y="16"/>
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+												</Texture>
+											</Layer>
+										</Layers>
+										
+										<NormalTexture atlas="chatframe-button-up"/>
+										<PushedTexture atlas="chatframe-button-down"/>
+										<HighlightTexture atlas="chatframe-button-highlight" alphaMode="ADD"/>
+										
+										<Scripts>
+											<OnClick>
+												self:GetParent():GetParent():Reset();
+												PlaySound(857);
+											</OnClick>
+											<OnMouseDown>
+												self.Icon:SetPoint("CENTER", -1, -1);
+											</OnMouseDown>
+											<OnMouseUp>
+												self.Icon:SetPoint("CENTER", 0, 0);
+											</OnMouseUp>
+											<OnEnter>
+												GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+												GameTooltip:SetText("Reset Positon And Scale", 1, 1, 1, nil, true);
+												GameTooltip:Show();
+											</OnEnter>
+											<OnLeave>
+												GameTooltip:Hide();
+											</OnLeave>
+										</Scripts>
+									</Button>
+												
+									<Slider parentKey="ScaleSlider" inherits="HorizontalSliderTemplate">
+										<Size x="100" y="15" />
+										<Anchors>
+											<Anchor point="LEFT" relativeKey="$parent.ResetPositionButton" relativePoint="RIGHT" x="1"/>
+										</Anchors>
+										
+										<Layers>
+											<Layer level="ARTWORK">
+												<FontString parentKey="Text" inherits="GameFontNormalSmall" text="100%">
+													<Anchors>
+														<Anchor point="LEFT" relativePoint="RIGHT" x="2" y="1"/>
+													</Anchors>
+												</FontString>
+											</Layer>
+										</Layers>
+										
+										<Scripts>
+											<OnValueChanged>
+												self:GetParent():GetParent():SetSDisplayScale(value, userInput);
+											</OnValueChanged>
+										</Scripts>
+									</Slider>
+								</Frames>
+							</Frame>
 							
 							<Frame parentKey="AlertIndicator" frameLevel="10" hidden="true">
 								<Size x="40" y="36"/>
 								<Anchors>
-									<Anchor point="BOTTOMLEFT" relativeKey="$parent.BGColorButton" relativePoint="TOPLEFT" x="1" y="1"/>
+									<Anchor point="BOTTOMLEFT" relativeKey="$parent.ControlsPanel" relativePoint="TOPLEFT" x="1" y="1"/>
 								</Anchors>
 									<Layers>
 									<Layer level="BACKGROUND">

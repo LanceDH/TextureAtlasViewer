@@ -12,6 +12,8 @@ local TAV_Defaults = {
 	}
 }
 
+local MAX_NUM_ISSUES = 30;
+local FORMAT_ISSUE_OVERFLOW = "+%s more issues.";
 local FORMAT_INVALID_ATLAS = "Invalid atlas name %s";
 local FORMAT_INVALID_TEXTURE = "No valid atlas info for %s\nNo texture size could be calculated.";
 local DATA_URL = "https://www.townlong-yak.com/framexml/live/Helix/AtlasInfo.lua";
@@ -153,6 +155,15 @@ function TAV:UpdateDisplayList(searchString, usePatterns)
 	wipe(self.bufferList);
 end
 
+function  TAV:GetAtlasInfo(atlasName)
+	if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
+		local fileName, width, height, leftTexCoord, rightTexCoord, topTexCoord, bottomTexCoord, tilesHorizontally, tilesVertically = GetAtlasInfo(atlasName);
+		if (not fileName) then return; end
+		return { ["fileName"] = fileName, ["width"] = width, ["height"] = height, ["leftTexCoord"] = leftTexCoord, ["rightTexCoord"] = rightTexCoord, ["bottomTexCoord"] = bottomTexCoord, ["topTexCoord"] = topTexCoord, ["tilesHorizontally"] = tilesHorizontally, ["tilesVertically"] = tilesVertically };
+	end
+	return C_Texture.GetAtlasInfo(atlasName);
+end
+
 -------------------------------------------------
 -- TAV_ScrollFrameMixin
 -------------------------------------------------
@@ -217,10 +228,12 @@ end
 -- ToggleBorders()
 -- BackgroundButtonOnClick()
 -- SetBackgroundColor(r, g, b, a)
+-- SetDisplayScale(scale, userInput)
 -- Reset()
 -- UpdateOverlays()	-- Keep the overlays and change their visuals
 -- CreateOverlays()	-- Recreate all overlays completely
 -- DisplayTexture(texture)
+-- UpdateChildSize() -- Apply scaling to the child and update the overlays
 -- OnMouseWheel(delta)
 -- OnDragStart()
 -- OnDragStop()
@@ -237,6 +250,14 @@ function TAV_DisplayContainerMixin:OnLoad()
 	self.scaleStep = 0.1;
 	self.width = 100;
 	self.height = 100;
+	local width, height = self:GetSize();
+	self.autoScaleWidth = width - 40;
+	self.autoScaleHeight = height - 40;
+	
+	TAV_ControlsPanel.ScaleSlider:SetMinMaxValues(self.scaleMin, self.scaleMax);
+	TAV_ControlsPanel.ScaleSlider:SetValue(self.currentScale);
+	TAV_ControlsPanel.ScaleSlider:SetValueStep(self.scaleStep);
+	TAV_ControlsPanel.ScaleSlider:SetObeyStepOnDrag(true);
 	
 	self.AlertIndicator.dataIssues = {};
 	
@@ -251,7 +272,7 @@ function TAV_DisplayContainerMixin:OnLoad()
 	info.hasOpacity = true;
 	info.opacityFunc = function() local r, g, b = ColorPickerFrame:GetColorRGB(); self:SetBackgroundColor(r, g, b, 1 - OpacitySliderFrame:GetValue()) end;
 	info.cancelFunc = function(previousColor) self:SetBackgroundColor(previousColor.r, previousColor.g, previousColor.b, 1-previousColor.opacity) end;
-	self.BGColorButton.info = info;
+	TAV_ControlsPanel.BGColorButton.info = info;
 	
 	-- Overlay setup
 	self.Overlay.Link:SetText(DATA_URL);
@@ -277,7 +298,7 @@ To update your data in the future, follow the same steps.]]
 end
 
 function TAV_DisplayContainerMixin:ApplySettings(settings)
-	self.ToggleBordersButton.Icon:SetTexture(settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
+	TAV_ControlsPanel.ToggleBordersButton.Icon:SetTexture(settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
 	self:SetBackgroundColor(settings.backgroundColor.r, settings.backgroundColor.g, settings.backgroundColor.b, settings.backgroundColor.a)
 end
 
@@ -320,12 +341,12 @@ end
 
 function TAV_DisplayContainerMixin:ToggleBorders()
 	TAV.settings.passiveBorders = not TAV.settings.passiveBorders;
-	self.ToggleBordersButton.Icon:SetTexture(TAV.settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
+	TAV_ControlsPanel.ToggleBordersButton.Icon:SetTexture(TAV.settings.passiveBorders and "Interface/LFGFRAME/BattlenetWorking9" or "Interface/LFGFRAME/BattlenetWorking4");
 	self:UpdateOverlays();
 end
 
 function TAV_DisplayContainerMixin:BackgroundButtonOnClick()
-	local info = self.BGColorButton.info;
+	local info = TAV_ControlsPanel.BGColorButton.info;
 	if (info) then
 		info.r, info.g, info.b = self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b;
 		info.opacity = 1 - self.backgroundColor.a;
@@ -335,22 +356,39 @@ end
 
 function TAV_DisplayContainerMixin:SetBackgroundColor(r, g, b, a)
 	self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b, self.backgroundColor.a = r, g, b, a;
-	self.BGColorButton.Preview:SetColorTexture(r, g, b, 1);
+	TAV_ControlsPanel.BGColorButton.Preview:SetColorTexture(r, g, b, 1);
 	self.Child.Background:SetColorTexture(r, g, b, a);
 	
 	local savedBGColor = TAV.settings.backgroundColor;
 	savedBGColor.r, savedBGColor.g, savedBGColor.b, savedBGColor.a = r, g, b, a;
 end
 
+function TAV_DisplayContainerMixin:SetSDisplayScale(scale, userInput)
+	if (not userInput) then return; end
+	scale = min(self.scaleMax, max(self.scaleMin, scale));
+	self.currentScale = scale;
+	self:UpdateChildSize();
+	local roundedScale = Round(scale * 100);
+	local display = PERCENTAGE_STRING:format(roundedScale);
+	TAV_ControlsPanel.ScaleSlider.Text:SetText(display);
+	TAV_ControlsPanel.ScaleSlider:SetValue(scale);
+end
+
 function TAV_DisplayContainerMixin:Reset()
-	self.currentScale = 1;
-	self.Child:SetSize(self.width, self.height);
+	local scale = 1;
+	if (self.height > self.autoScaleHeight or self.width > self.autoScaleWidth) then
+		local widthScale = floor(self.autoScaleWidth / self.width / self.scaleStep) * self.scaleStep;
+		local heightScale = floor(self.autoScaleHeight / self.height  / self.scaleStep) * self.scaleStep;
+		scale = max(self.scaleMin, min(widthScale, heightScale));
+	end
+	self:SetSDisplayScale(scale, true);
 	self.Child:ClearAllPoints();
 	self.Child:SetPoint("CENTER");
 	self:CreateOverlays();
 end
 
 function TAV_DisplayContainerMixin:UpdateOverlays()
+	if (not self.overlayPool) then return; end
 	-- Keep the overlays, but change their appearences
 	for overlay in self.overlayPool:EnumerateActive() do
 		overlay:UpdateColor();
@@ -366,7 +404,7 @@ function TAV_DisplayContainerMixin:CreateOverlays()
 	
 	for k, name in ipairs(atlasNames) do
 		if (type(name) == "string") then
-			local info = C_Texture.GetAtlasInfo(name);
+			local info = TAV:GetAtlasInfo(name);
 			if (info) then 
 				local overlay = self.overlayPool:Acquire();
 				overlay:Init(name, info);
@@ -379,9 +417,11 @@ function TAV_DisplayContainerMixin:DisplayTexture(texture)
 	if (self.texture == texture) then return; end
 	self.texture = texture;
 	self.width = 256;
-	self.height = 256
+	self.height = 256;
+	self:Reset();
 
 	wipe(self.AlertIndicator.dataIssues);
+	local issueOverflow = 0;
 	
 	if (not texture) then return; end
 	
@@ -393,12 +433,21 @@ function TAV_DisplayContainerMixin:DisplayTexture(texture)
 	local firstValidAtlas;
 	-- Loop over all atlases and check for any issues
 	for i = 1, #atlasNames do
-		local info = C_Texture.GetAtlasInfo(atlasNames[i]);
+		local info = TAV:GetAtlasInfo(atlasNames[i]);
 		if (info) then
 			firstValidAtlas = info;
 		else
-			tinsert(self.AlertIndicator.dataIssues, FORMAT_INVALID_ATLAS:format(atlasNames[i]));
+			if (#self.AlertIndicator.dataIssues < MAX_NUM_ISSUES) then
+				tinsert(self.AlertIndicator.dataIssues, FORMAT_INVALID_ATLAS:format(atlasNames[i]));
+			else
+				issueOverflow = issueOverflow + 1;
+			end
 		end
+	end
+	
+	-- too many issues
+	if (issueOverflow > 0) then
+		tinsert(self.AlertIndicator.dataIssues, FORMAT_ISSUE_OVERFLOW:format(issueOverflow));
 	end
 	
 	if (firstValidAtlas) then 
@@ -415,11 +464,18 @@ function TAV_DisplayContainerMixin:DisplayTexture(texture)
 	self:HideAtlasInfo();
 	self.Child.Texture:SetTexture(texture);
 	self.Child:Show();
-	self.Child:SetSize(self.width, self.height);
-	self.FilePathBox:SetText(texture);
+	TAV_ControlsPanel.FilePathBox:SetText(texture);
 	PlaySound(836);
 	
 	self:SetImportOverlayShown(false);
+end
+
+function TAV_DisplayContainerMixin:UpdateChildSize()
+	local newWidth = self.width * self.currentScale;
+	local newHeight = self.height * self.currentScale;
+	self.Child:SetSize(newWidth,newHeight);
+	self:UpdateOverlays();
+	return newWidth, newHeight
 end
 
 function TAV_DisplayContainerMixin:OnMouseWheel(delta)
@@ -431,11 +487,10 @@ function TAV_DisplayContainerMixin:OnMouseWheel(delta)
 	local offsetX = (childCenterX - centerX) / originalWidth;
 	local offsetY = (childCenterY - centerY) / originalHeight;
 	-- Change the size of the child
-	self.currentScale = self.currentScale + (self.scaleStep * delta);
-	self.currentScale = min(self.scaleMax, max(self.scaleMin, self.currentScale));
-	local newWidth = self.width * self.currentScale;
-	local newHeight = self.height * self.currentScale;
-	self.Child:SetSize(newWidth,newHeight);
+	local scale = self.currentScale + (self.scaleStep * delta);
+	scale = min(self.scaleMax, max(self.scaleMin, scale));
+	self:SetSDisplayScale(scale, true);
+	local newWidth, newHeight = self.Child:GetSize();
 	-- Reposition child so the container's center is on the same normalized position
 	self.Child:ClearAllPoints();
 	self.Child:SetPoint("CENTER", self, offsetX * newWidth, offsetY * newHeight)
@@ -514,7 +569,7 @@ function TAV_ListButtonMixin:Update(info)
 	self.Text:SetText(info.display);
 	local color = NORMAL_FONT_COLOR;
 	if (info.priority == 2) then
-		color = WHITE_FONT_COLOR;
+		color = HIGHLIGHT_FONT_COLOR;
 	elseif (info.priority == 3) then
 		color = GRAY_FONT_COLOR;
 	end
@@ -596,7 +651,7 @@ function TAV_AtlasFrameMixin:OnDragStop()
 end
 
 function TAV_AtlasFrameMixin:UpdateColor()
-	local color = WHITE_FONT_COLOR;
+	local color = HIGHLIGHT_FONT_COLOR;
 	self.shouldHighlight = false;
 	if(self.name == TAV_DisplayContainer.selectedAtlas) then
 		color = YELLOW_FONT_COLOR;
