@@ -1,8 +1,8 @@
-﻿## Interface: 80205
+﻿## Interface: 90002
 ## Title: TextureAtlasViewer
 ## Notes: An interactive viewer to help find texture atlas names.
 ## Author: LanceDH
-## Version: 8.2.02
+## Version: 9.0.03
 ## SavedVariables: ATVDB
 
 TextureAtlasViewer.xml

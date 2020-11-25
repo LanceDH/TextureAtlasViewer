@@ -19,15 +19,22 @@ local FORMAT_INVALID_TEXTURE = "No valid atlas info for %s\nNo texture size coul
 local DATA_URL = "https://www.townlong-yak.com/framexml/live/Helix/AtlasInfo.lua";
 local SAVE_VARIABLE_COPY_INFO = "Copy paste the list from " .. DATA_URL .. " here instead of this message. Make sure to include the opening and closing brackets.";
 
+local RESULT_PRIORITY = {
+	["none"] = 0
+	,["fileName"] = 1
+	,["atlasName"] = 2
+	,["folderName"] = 3
+}
+
 function TAV:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("ATVDB", TAV_Defaults, true);
-	self.atlasInfo = self.db.global.AtlasInfo;
+	self.atlasInfo = _addon.data;
 	
-	if (not self.atlasInfo) then
-		self.db.global.AtlasInfo = SAVE_VARIABLE_COPY_INFO;
-		self.atlasInfo = self.db.global.AtlasInfo;
+	-- Remove old data
+	if (self.db.global.AtlasInfo) then
+		self.db.global.AtlasInfo = nil;
 	end
-	
+
 	self.settings =  self.db.global.settings;
 end
 
@@ -49,7 +56,7 @@ function TAV:OnEnable()
 	
 	local toReplace = {};
 	for texture, atlasInfo in pairs(self.atlasInfo) do
-		-- Delete all imported atlas info and turn keys into an intterative list
+		-- Delete all imported atlas info and turn keys into an itterative list
 		wipe(toReplace);
 		for key in pairs(atlasInfo) do
 			if (type(key) == "string") then
@@ -68,7 +75,7 @@ function TAV:OnEnable()
 			if (displayName) then
 				displayName = displayName:gsub("(%l)(%u)", "%1 %2");
 			end
-			local entryInfo = {["display"] = displayName or texture, ["name"] = name or texture, ["path"] = path, ["texture"] = texture, ["priority"] = 0};
+			local entryInfo = {["display"] = displayName or texture, ["name"] = name or texture, ["path"] = path, ["texture"] = texture, ["priority"] = RESULT_PRIORITY.none};
 			tinsert(self.displayList, entryInfo);
 			tinsert(self.filteredList, entryInfo);
 		end
@@ -85,6 +92,7 @@ function TAV:OnEnable()
 	-- Show first in the list
 	if (#self.filteredList > 0) then
 		TAV_DisplayContainer:DisplayTexture(self.filteredList[1].texture);
+		TAV_ScrollFrameScrollChild.selected = self.filteredList[1].texture;
 	end
 end
 
@@ -109,29 +117,29 @@ end
 function  TAV:GetSearchPriority(info, searchString, usePatterns)
 	-- File name
 	if (info.name:lower():find(searchString, nil, not usePatterns)) then
-		return 1;
+		return RESULT_PRIORITY.fileName;
 	end
 	-- Atlas name
 	for key, name in ipairs(self.atlasInfo[info.texture]) do
 		if (name:lower():find(searchString, nil, not usePatterns)) then
-			return 2;
+			return RESULT_PRIORITY.atlasName;
 		end
 	end
 	-- File path
 	if (info.path) then
 		if (info.path:lower():find(searchString, nil, not usePatterns)) then
-			return 3;
+			return RESULT_PRIORITY.folderName;
 		end
 	end
 	
-	return 0;
+	return RESULT_PRIORITY.none;
 end
 
 function TAV:UpdateDisplayList(searchString, usePatterns)
 	wipe(self.bufferList);
 	for k, info in ipairs(self.displayList) do
 		info.priority = self:GetSearchPriority(info, searchString, usePatterns);
-		if (info.priority  > 0) then
+		if (info.priority  > RESULT_PRIORITY.none) then
 			tinsert(self.bufferList, info);
 		end
 	end
@@ -277,23 +285,26 @@ function TAV_DisplayContainerMixin:OnLoad()
 	-- Overlay setup
 	self.Overlay.Link:SetText(DATA_URL);
 	local before = [[Since there is no official way to get the info of all available textures and their atlases, data must be manually provided.
+As of version 9.0.01, a default set of data is provided with the add-on.
 
-To do so, follow these steps:
-  1. Log out of your character. This is important!
-  2. Go into your saved variables folder.
-       (WoW/WTF/Account/<Your Account>/SavedVariables)
-  3. Open the file TextureAtlasViewer.lua in a text editor.
-  4. There you will find the variable ["AtlasInfo"] =.
-  5. Visit the following URL:]]
+If you wish to manually update your data to a different version, follow these steps:
+  1. Go into your add-on folder.
+       (WoW/_retail_/Interface/AddOns/TextureAtlasViewer)
+  2. Open the file Data.lua in a text editor.
+  3. Some commented text will provide addition information
+  4. Visit the following URL:]]
 	self.Overlay.InfoBefore:SetText(before);
-	local after=[[  6. Copy the entire table after 'AtlasInfo ='.
-       Be sure to include the opening and closing brackets!
-  7. Pasted it in the saved variables file so it looks like this: 
-       ["AtlasInfo"] = { <a lot of data here> },
+	local after=[[  5. Copy the entire text block starting with 'local AtlasInfo =' and ending at the last closing brackets
+  6. Do not include the last line which says 'return AtlasInfo'
+  7. Replace the block of text in the file in between the two comment blocks.
   8. SAVE the file and close it.
-  9. You can now log back in and use the Add-on.
+  9. /reload your ui in game
+  ]]
   
-To update your data in the future, follow the same steps.]]
+  local patchNr, buildNr = GetBuildInfo();
+  local colorCode = (tonumber(_addon.dataBuild) < tonumber(buildNr)) and "ffff5555" or "ff55ff55";
+  
+	after = after .. "\n\nClient build nr: |cffffffff" .. buildNr .. "|r\nData build nr: |c"..colorCode .. _addon.dataBuild .."|r";
 	self.Overlay.InfoAfter:SetText(after);
 end
 
@@ -318,13 +329,6 @@ function TAV_DisplayContainerMixin:OnSearchChanged()
 	TAV_ScrollFrame:RefreshButtons();
 	
 	TAV_DisplayContainer:UpdateOverlays();
-end
-
-function TAV_DisplayContainerMixin:ClearDataButtonOnClick()
-	if (not TAV:ClearData()) then return; end
-	PlaySound(857);
-	self:DisplayTexture();
-	self:SetImportOverlayShown(true, true);
 end
 
 function TAV_DisplayContainerMixin:NameMatchesCurrentSearch(name)
@@ -551,8 +555,28 @@ function TAV_DisplayContainerMixin:SetImportOverlayShown(show, hideButtons)
 	end
 	self.Overlay:SetShown(show);
 
-	self.Overlay.ClearDataButton:SetShown(not hideButtons);
 	TAV_CoreFrame.LeftInset.InfoButton:SetShown(not hideButtons);
+end
+
+function TAV_DisplayContainerMixin:OnUpdate(elapsed)
+	if (self:IsMouseOver()) then
+		local x, y = GetCursorPosition();
+		local effectiveScale = UIParent:GetEffectiveScale();
+		x = x / effectiveScale;
+		y = y / effectiveScale;
+		
+		x = x - self.Child:GetLeft();
+		y =  -y + self.Child:GetTop();
+		
+		local width, height = self.Child:GetSize();
+	
+		x = Saturate(x/width);
+		y = Saturate(y/height);
+		
+		
+		TAV_ControlsPanel.Coordinates.PosX:SetText(string.format("%.5f", x));
+		TAV_ControlsPanel.Coordinates.PosY:SetText(string.format("%.5f", y));
+	end
 end
 
 -------------------------------------------------
@@ -568,9 +592,9 @@ function TAV_ListButtonMixin:Update(info)
 	self:Show();
 	self.Text:SetText(info.display);
 	local color = NORMAL_FONT_COLOR;
-	if (info.priority == 2) then
+	if (info.priority == RESULT_PRIORITY.atlasName) then
 		color = HIGHLIGHT_FONT_COLOR;
-	elseif (info.priority == 3) then
+	elseif (info.priority == RESULT_PRIORITY.folderName) then
 		color = GRAY_FONT_COLOR;
 	end
 	self.Text:SetVertexColor(color:GetRGB());
@@ -693,9 +717,11 @@ end
 
 SLASH_TAVSLASH1 = '/tav';
 SLASH_TAVSLASH2 = '/textureatlasviewer';
-local function slashcmd()
+local function slashcmd(msg)
 	if (InCombatLockdown()) then return; end
-
+	if (msg ~= "") then
+		TAV_CoreFrame.LeftInset.SearchBox:SetText(msg);
+	end
 	TAV_CoreFrame:Show();
 end
 SlashCmdList["TAVSLASH"] = slashcmd

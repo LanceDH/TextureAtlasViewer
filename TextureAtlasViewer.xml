@@ -6,6 +6,7 @@
 	<Include file="libs\AceAddon-3.0\AceAddon-3.0.xml"/>
 	<Include file="libs\AceDB-3.0\AceDB-3.0.xml"/>
 
+	<Script file="Data.lua"/>
 	<Script file="TextureAtlasViewer.lua"/>
 	
 	<EditBox name="TAV_CopyBoxTemplate" inherits="InputBoxTemplate" virtual="true" autoFocus="false"> 
@@ -145,7 +146,7 @@
 		</Scripts>
 	</Button>
 	
-	<Frame name="TAV_CoreFrame" inherits="BasicFrameTemplate" movable="true" parent="UIParent" clampedToScreen="true" hidden="true">
+	<Frame name="TAV_CoreFrame" inherits="BasicFrameTemplate" movable="true" parent="UIParent" clampedToScreen="true" hidden="true" toplevel="true">
 		<Size x="1000" y="600" />
 		
 		<Anchors>
@@ -225,7 +226,7 @@
 							</OnMouseUp>
 							<OnEnter>
 								GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-								GameTooltip:SetText("Toggle Import Info", 1, 1, 1, nil, true);
+								GameTooltip:SetText("Data update info", 1, 1, 1, nil, true);
 								GameTooltip:Show();
 							</OnEnter>
 							<OnLeave>
@@ -309,26 +310,6 @@
 											<Anchor point="CENTER"/>
 										</Anchors>
 									</EditBox>
-									
-									<Button parentKey="ClearDataButton" inherits="MagicButtonTemplate" text="Clear Data">
-										<Size x="98" y="22"/>
-										<Anchors>
-											<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
-										</Anchors>
-										<Scripts>
-											<OnClick>
-												TAV_DisplayContainer:ClearDataButtonOnClick();
-											</OnClick>
-											<OnEnter>
-												GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-												GameTooltip:AddLine("Remove all texture and atlas data. This will make it easier to import new data.", 1, 1, 1, true);
-												GameTooltip:Show();
-											</OnEnter>
-											<OnLeave>
-												GameTooltip:Hide();
-											</OnLeave>
-										</Scripts>
-									</Button>
 								</Frames>
 								
 								<Layers>
@@ -371,6 +352,27 @@
 									<Layer level="ARTWORK">
 										<Texture parentKey="Texture" file="Interface\Animations\PowerSwirlAnimation">
 										</Texture>
+										
+										<FontString parentKey="coordTopleft" inherits="GameFontDisableSmallLeft" justifyH="RIGHT" text="0,0" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMRIGHT" relativePoint="TOPLEFT" x="-2" y="2"/>
+											</Anchors>
+										</FontString>
+										<FontString parentKey="coordTopRight" inherits="GameFontDisableSmallLeft" justifyH="RIGHT" text="1,0" alpha="0.65">
+											<Anchors>
+												<Anchor point="BOTTOMLEFT" relativePoint="TOPRIGHT" x="2" y="2"/>
+											</Anchors>
+										</FontString>
+										<FontString parentKey="coordBottomleft" inherits="GameFontDisableSmallLeft" justifyH="RIGHT" text="0,1" alpha="0.65">
+											<Anchors>
+												<Anchor point="TOPRIGHT" relativePoint="BOTTOMLEFT" x="-2" y="-2"/>
+											</Anchors>
+										</FontString>
+										<FontString parentKey="coordBottomRight" inherits="GameFontDisableSmallLeft" justifyH="RIGHT" text="1,1" alpha="0.65">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" x="2" y="-2"/>
+											</Anchors>
+										</FontString>
 									</Layer>
 								</Layers>
 							</Frame>
@@ -385,7 +387,7 @@
 										<Texture parentKey="TR1" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
 											<Size x="6" y="6"/>
 											<Anchors>
-												<Anchor point="TOPRIGHT" x="-100"/>
+												<Anchor point="TOPRIGHT"/>
 											</Anchors>
 											<TexCoords left="0.71875" right="1" top="0" bottom="0.28125"/>
 										</Texture>
@@ -398,7 +400,7 @@
 										</Texture>
 										<Texture parentKey="R1" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
 											<Anchors>
-												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.TR1" y="-19"/>
+												<Anchor point="BOTTOMRIGHT"/>
 												<Anchor point="TOPLEFT" relativeKey="$parent.TR1" relativePoint="BOTTOMLEFT"/>
 											</Anchors>
 											<TexCoords left="0.71875" right="1" top="0.28125" bottom="0.71875"/>
@@ -407,46 +409,6 @@
 											<Anchors>
 												<Anchor point="BOTTOMLEFT"/>
 												<Anchor point="TOPRIGHT" relativeKey="$parent.TR1" relativePoint="BOTTOMLEFT"/>
-											</Anchors>
-											<TexCoords left="0.28125" right="0.71875" top="0.28125" bottom="0.71875"/>
-										</Texture>
-										
-										
-										
-										<Texture parentKey="MC" alpha="0.65">
-											<Size x="3" y="3"/>
-											<Anchors>
-												<Anchor point="TOPLEFT" relativeKey="$parent.R1" relativePoint="BOTTOMLEFT"/>
-											</Anchors>
-											<Color r="0" g="0" b="0"/>
-										</Texture>
-										
-										<Texture parentKey="TR2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
-											<Size x="6" y="6"/>
-											<Anchors>
-												<Anchor point="RIGHT" />
-												<Anchor point="BOTTOM" relativeKey="$parent.MC"/>
-											</Anchors>
-											<TexCoords left="0.71875" right="1" top="0" bottom="0.28125"/>
-										</Texture>
-										<Texture parentKey="T2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
-											<Anchors>
-												<Anchor point="BOTTOMLEFT" relativeKey="$parent.MC" relativePoint="BOTTOMRIGHT"/>
-												<Anchor point="TOPRIGHT" relativeKey="$parent.TR2" relativePoint="TOPLEFT"/>
-											</Anchors>
-											<TexCoords left="0.28125" right="0.71875" top="0" bottom="0.28125"/>
-										</Texture>
-										<Texture parentKey="R2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
-											<Anchors>
-												<Anchor point="BOTTOMRIGHT"/>
-												<Anchor point="TOPLEFT" relativeKey="$parent.TR2" relativePoint="BOTTOMLEFT"/>
-											</Anchors>
-											<TexCoords left="0.71875" right="1" top="0.28125" bottom="0.71875"/>
-										</Texture>
-										<Texture parentKey="C2" file="Interface\GLUES\CHARACTERCREATE\UI-CharacterCreate-IconShadow" alpha="0.65">
-											<Anchors>
-												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.R2" relativePoint="BOTTOMLEFT"/>
-												<Anchor point="TOPLEFT" relativeKey="$parent.MC" relativePoint="BOTTOMLEFT"/>
 											</Anchors>
 											<TexCoords left="0.28125" right="0.71875" top="0.28125" bottom="0.71875"/>
 										</Texture>
@@ -621,6 +583,55 @@
 											</OnValueChanged>
 										</Scripts>
 									</Slider>
+									
+									<Frame parentKey="Coordinates" >
+										<Size y="21" x="62"/>
+										<Anchors>
+											<Anchor point="TOPRIGHT" x="-5" y="-5"/>
+										</Anchors>
+										
+										<Layers>
+											<Layer level="ARTWORK">
+												<FontString parentKey="LabelX" inherits="GameFontHighlightSmallLeft" justifyH="LEFT" justifyV="TOP" text="X:">
+													<Size x="15"/>
+													<Anchors>
+														<Anchor point="TOPLEFT" />
+														<Anchor point="BOTTOMLEFT" relativePoint="LEFT"/>
+													</Anchors>
+													<Color r="0.75" g="0.75" b="0.75"/>
+												</FontString>
+											</Layer>
+											<Layer level="ARTWORK">
+												<FontString parentKey="LabelY" inherits="GameFontHighlightSmallLeft" justifyH="LEFT" justifyV="TOP" text="Y:">
+													<Size x="15"/>
+													<Anchors>
+														<Anchor point="TOPLEFT" relativePoint="LEFT"/>
+														<Anchor point="BOTTOMLEFT"/>
+													</Anchors>
+													<Color r="0.75" g="0.75" b="0.75"/>
+												</FontString>
+											</Layer>
+											<Layer level="ARTWORK">
+												<FontString parentKey="PosX" inherits="GameFontHighlightSmallLeft" justifyH="LEFT" justifyV="TOP" text="0.00000">
+													<Anchors>
+														<Anchor point="TOPLEFT" relativeKey="$parent.LabelX" relativePoint="TOPRIGHT"/>
+														<Anchor point="BOTTOMRIGHT" relativePoint="RIGHT"/>
+													</Anchors>
+													<Color r="0.75" g="0.75" b="0.75"/>
+												</FontString>
+											</Layer>
+											<Layer level="ARTWORK">
+												<FontString parentKey="PosY" inherits="GameFontHighlightSmallLeft" justifyH="LEFT" justifyV="BOTTOM" text="0.00000">
+													<Anchors>
+														<Anchor point="TOPLEFT" relativeKey="$parent.LabelY" relativePoint="TOPRIGHT"/>
+														<Anchor point="BOTTOMRIGHT"/>
+													</Anchors>
+													<Color r="0.75" g="0.75" b="0.75"/>
+												</FontString>
+											</Layer>
+										</Layers>
+									
+									</Frame>
 								</Frames>
 							</Frame>
 							
@@ -651,7 +662,7 @@
 								</Scripts>
 							</Frame>
 							
-							<Frame name="TAV_InfoPanel" parentKey="InfoPanel" frameLevel="10" hidden="true">
+							<Frame name="TAV_InfoPanel" parentKey="InfoPanel" frameLevel="10" hidden="true" mixin="BackdropTemplateMixin">
 								<Size x="210" y="215"/>
 								<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 									<EdgeSize>
@@ -797,6 +808,15 @@
 								
 								<Scripts>
 									<OnLoad>
+										self.backdropInfo = {
+												bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+												edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+												edgeSize = 16,
+												tileEdge = true,
+												insets = { left = 3, right = 3, top = 3, bottom = 3 },
+											};
+										self:OnBackdropLoaded();
+										<!-- I can keyvalue the color, but I'd rather not create a global variable -->
 										self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
 									</OnLoad>
 								</Scripts>
@@ -805,6 +825,7 @@
 						</Frames>
 						<Scripts>
 							<OnLoad method="OnLoad"/>
+							<OnUpdate method="OnUpdate"/>
 							<OnMouseWheel method="OnMouseWheel"/>
 							<OnDragStart method="OnDragStart"/>
 							<OnDragStop method="OnDragStop"/>
