@@ -115,6 +115,7 @@ function  TAV:ClearData()
 end
 
 function  TAV:GetSearchPriority(info, searchString, usePatterns)
+	print(info.name, searchString)
 	-- File name
 	if (info.name:lower():find(searchString, nil, not usePatterns)) then
 		return RESULT_PRIORITY.fileName;
@@ -318,6 +319,7 @@ function TAV_DisplayContainerMixin:OnSearchChanged()
 	local text = searchBox:GetText() or "";
 
 	text = text:lower();
+	text = text:gsub(" ", "");
 	if not pcall(function() TAV:UpdateDisplayList(text, self.enablePatterns) end) then 
 		searchBox:SetTextColor(1, 0.25, 0.25, 1);
 		return; 
@@ -333,7 +335,6 @@ end
 
 function TAV_DisplayContainerMixin:NameMatchesCurrentSearch(name)
 	if (not name or not self.searchString or self.searchString == "") then return false; end
-	
 	return name:lower():find(self.searchString, nil, not self.enablePatterns);
 end
 
