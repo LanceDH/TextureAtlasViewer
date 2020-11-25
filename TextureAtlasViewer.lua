@@ -115,7 +115,6 @@ function  TAV:ClearData()
 end
 
 function  TAV:GetSearchPriority(info, searchString, usePatterns)
-	print(info.name, searchString)
 	-- File name
 	if (info.name:lower():find(searchString, nil, not usePatterns)) then
 		return RESULT_PRIORITY.fileName;
