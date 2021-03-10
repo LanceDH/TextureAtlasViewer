@@ -5,8 +5,9 @@ local TAV = LibStub("AceAddon-3.0"):NewAddon("AtlastTextureViewer");
 local TAV_Defaults = {
 	["global"] = {	
 		["settings"] = {
-				["passiveBorders"] = true
-				,["backgroundColor"] = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 1}
+				["passiveBorders"] = true,
+				["backgroundColor"] = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 1},
+				["showIssues"] = false;
 			}
 		,["AtlasInfo"] = nil
 	}
@@ -14,7 +15,7 @@ local TAV_Defaults = {
 
 local MAX_NUM_ISSUES = 30;
 local FORMAT_ISSUE_OVERFLOW = "+%s more issues.";
-local FORMAT_INVALID_ATLAS = "Invalid atlas name %s";
+local FORMAT_INVALID_ATLAS = "Atlas %s not found through API";
 local FORMAT_INVALID_TEXTURE = "No valid atlas info for %s\nNo texture size could be calculated.";
 local DATA_URL = "https://www.townlong-yak.com/framexml/live/Helix/AtlasInfo.lua";
 local SAVE_VARIABLE_COPY_INFO = "Copy paste the list from " .. DATA_URL .. " here instead of this message. Make sure to include the opening and closing brackets.";
@@ -30,6 +31,22 @@ function TAV:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("ATVDB", TAV_Defaults, true);
 	self.atlasInfo = _addon.data;
 	
+	-- Check every atlas if the API knows it exists
+	-- If not we store it ourselves if the user wants to see it anyway
+	self.backupInfo = {};
+
+	for file, list in pairs(self.atlasInfo) do
+		local isvalid = false;
+		for atlas, info in pairs(list) do
+			if (not TAV:GetAtlasInfo(atlas)) then
+				local reformat =  {["missing"] = true, ["fileName"] = file, ["width"] = info[1], ["height"] = info[2], ["leftTexCoord"] = info[3], ["rightTexCoord"] = info[4], ["topTexCoord"] = info[5], ["bottomTexCoord"] = info[6], ["tilesHorizontally"] = info[7], ["tilesVertically"] = info[8]};
+				self.backupInfo[atlas] = reformat;
+			else
+			 isvalid = true;
+			end
+		end
+	end
+
 	-- Remove old data
 	if (self.db.global.AtlasInfo) then
 		self.db.global.AtlasInfo = nil;
@@ -164,11 +181,19 @@ function TAV:UpdateDisplayList(searchString, usePatterns)
 end
 
 function  TAV:GetAtlasInfo(atlasName)
+	-- Check if we know it's missing and made backup data;
+	if (self.backupInfo[atlasName]) then
+		return self.backupInfo[atlasName];
+	end
+
+	-- Try Classic API
 	if (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) then
 		local fileName, width, height, leftTexCoord, rightTexCoord, topTexCoord, bottomTexCoord, tilesHorizontally, tilesVertically = GetAtlasInfo(atlasName);
 		if (not fileName) then return; end
 		return { ["fileName"] = fileName, ["width"] = width, ["height"] = height, ["leftTexCoord"] = leftTexCoord, ["rightTexCoord"] = rightTexCoord, ["bottomTexCoord"] = bottomTexCoord, ["topTexCoord"] = topTexCoord, ["tilesHorizontally"] = tilesHorizontally, ["tilesVertically"] = tilesVertically };
 	end
+	
+	-- Retail API
 	return C_Texture.GetAtlasInfo(atlasName);
 end
 
@@ -267,7 +292,7 @@ function TAV_DisplayContainerMixin:OnLoad()
 	TAV_ControlsPanel.ScaleSlider:SetValueStep(self.scaleStep);
 	TAV_ControlsPanel.ScaleSlider:SetObeyStepOnDrag(true);
 	
-	self.AlertIndicator.dataIssues = {};
+	self.dataIssues = {};
 	
 	self.overlayPool = CreateFramePool("BUTTON", self.Child, "TAV_AtlasFrameTemplate");
 	self:RegisterForDrag("LeftButton");
@@ -379,6 +404,9 @@ function TAV_DisplayContainerMixin:SetSDisplayScale(scale, userInput)
 end
 
 function TAV_DisplayContainerMixin:Reset()
+
+	self:TrySetTextureSize();
+
 	local scale = 1;
 	if (self.height > self.autoScaleHeight or self.width > self.autoScaleWidth) then
 		local widthScale = floor(self.autoScaleWidth / self.width / self.scaleStep) * self.scaleStep;
@@ -389,6 +417,9 @@ function TAV_DisplayContainerMixin:Reset()
 	self.Child:ClearAllPoints();
 	self.Child:SetPoint("CENTER");
 	self:CreateOverlays();
+
+	self.AlertIndicator.Icon:SetDesaturated(TAV.settings.showIssues);
+	self.AlertIndicator.enabled = TAV.settings.showIssues;
 end
 
 function TAV_DisplayContainerMixin:UpdateOverlays()
@@ -409,7 +440,7 @@ function TAV_DisplayContainerMixin:CreateOverlays()
 	for k, name in ipairs(atlasNames) do
 		if (type(name) == "string") then
 			local info = TAV:GetAtlasInfo(name);
-			if (info) then 
+			if (info and (not info.missing or TAV.settings.showIssues)) then 
 				local overlay = self.overlayPool:Acquire();
 				overlay:Init(name, info);
 			end
@@ -417,53 +448,66 @@ function TAV_DisplayContainerMixin:CreateOverlays()
 	end
 end
 
-function TAV_DisplayContainerMixin:DisplayTexture(texture)
-	if (self.texture == texture) then return; end
-	self.texture = texture;
-	self.width = 256;
-	self.height = 256;
-	self:Reset();
-
-	wipe(self.AlertIndicator.dataIssues);
+function TAV_DisplayContainerMixin:TrySetTextureSize()
+	wipe(self.dataIssues);
 	local issueOverflow = 0;
+	local issuesFound = false;
 	
-	if (not texture) then return; end
+	if (not self.texture) then return; end
 	
-	local atlasNames = TAV.atlasInfo[texture];
+	local atlasNames = TAV.atlasInfo[self.texture];
 	if (not atlasNames or #atlasNames == 0) then 
 		return;
 	end
 	
-	local firstValidAtlas;
+	local validAtlas;
+	local id = 0;
 	-- Loop over all atlases and check for any issues
 	for i = 1, #atlasNames do
 		local info = TAV:GetAtlasInfo(atlasNames[i]);
-		if (info) then
-			firstValidAtlas = info;
-		else
-			if (#self.AlertIndicator.dataIssues < MAX_NUM_ISSUES) then
-				tinsert(self.AlertIndicator.dataIssues, FORMAT_INVALID_ATLAS:format(atlasNames[i]));
+		if (not info or info.missing) then
+			-- Mark it as an issue
+			issuesFound = true;
+			if (#self.dataIssues < MAX_NUM_ISSUES) then
+				tinsert(self.dataIssues, atlasNames[i]);
 			else
 				issueOverflow = issueOverflow + 1;
 			end
+			
+			-- If user wants to include issue altases, count it as the first valid
+			if (info and TAV.settings.showIssues) then
+				validAtlas = info;
+				id = i;
+			end
+		else
+			validAtlas = info;
+			id = i;
 		end
 	end
 	
 	-- too many issues
 	if (issueOverflow > 0) then
-		tinsert(self.AlertIndicator.dataIssues, FORMAT_ISSUE_OVERFLOW:format(issueOverflow));
+		tinsert(self.dataIssues, FORMAT_ISSUE_OVERFLOW:format(issueOverflow));
 	end
 	
-	if (firstValidAtlas) then 
+	if (validAtlas) then 
 		-- Calcultate texture size based on width and coords of one of the atlases
-		self.width = firstValidAtlas.width / (firstValidAtlas.rightTexCoord - firstValidAtlas.leftTexCoord);
-		self.height = firstValidAtlas.height / (firstValidAtlas.bottomTexCoord - firstValidAtlas.topTexCoord);
+		self.width = validAtlas.width / (validAtlas.rightTexCoord - validAtlas.leftTexCoord);
+		self.height = validAtlas.height / (validAtlas.bottomTexCoord - validAtlas.topTexCoord);
 	else
-		tinsert(self.AlertIndicator.dataIssues, FORMAT_INVALID_TEXTURE:format(texture));
+		self.width = 256;
+		self.height = 256;
+		tinsert(self.dataIssues, FORMAT_INVALID_TEXTURE:format(self.texture));
 	end
 	
-	self.AlertIndicator:SetShown(#self.AlertIndicator.dataIssues > 0);
+	self.AlertIndicator:SetShown(issuesFound);
+end
 
+function TAV_DisplayContainerMixin:DisplayTexture(texture)
+	if (self.texture == texture) then return; end
+	self.texture = texture;
+	self.width = 256;
+	self.height = 256;
 	self:Reset();
 	self:HideAtlasInfo();
 	self.Child.Texture:SetTexture(texture);
@@ -544,8 +588,9 @@ function TAV_DisplayContainerMixin:ShowAtlasInfo(name, atlasInfo)
 	TAV_InfoPanel.Right:SetText(atlasInfo.rightTexCoord);
 	TAV_InfoPanel.Top:SetText(atlasInfo.topTexCoord);
 	TAV_InfoPanel.Bottom:SetText(atlasInfo.bottomTexCoord);
-	TAV_InfoPanel.IconHorizontalTile:SetAtlas(atlasInfo.tilesHorizontally and "ParagonReputation_Checkmark" or "communities-icon-redx")
-	TAV_InfoPanel.IconVerticalTile:SetAtlas(atlasInfo.tilesVertically and "ParagonReputation_Checkmark" or "communities-icon-redx")
+	TAV_InfoPanel.IconHorizontalTile:SetAtlas(atlasInfo.tilesHorizontally and "ParagonReputation_Checkmark" or "communities-icon-redx");
+	TAV_InfoPanel.IconVerticalTile:SetAtlas(atlasInfo.tilesVertically and "ParagonReputation_Checkmark" or "communities-icon-redx");
+	TAV_InfoPanel.AlertIndicator:SetShown(atlasInfo.missing);
 	TAV_InfoPanel:Show();
 end
 
@@ -578,6 +623,29 @@ function TAV_DisplayContainerMixin:OnUpdate(elapsed)
 		TAV_ControlsPanel.Coordinates.PosY:SetText(string.format("%.5f", y));
 	end
 end
+
+function TAV_DisplayContainerMixin:ToggleIssueDisplay()
+	TAV.settings.showIssues = not TAV.settings.showIssues;
+	self:Reset();
+	self:AlertIndicatorOnEnter();
+end
+
+function TAV_DisplayContainerMixin:AlertIndicatorOnEnter()
+	GameTooltip:Hide();
+	GameTooltip:SetOwner(self.AlertIndicator, "ANCHOR_RIGHT");
+	GameTooltip:SetText("No API info for following atlases", 1, 1, 1, nil, true);
+	for k, issue in ipairs(self.dataIssues) do
+		GameTooltip:AddLine(issue);
+	end
+	GameTooltip:AddLine("Your data might be outdated or incorrect.", 1, 0.3, 0.3);
+	if (self.AlertIndicator.enabled) then
+		GameTooltip:AddLine("Click to prevent potentially outdated data.", GREEN_FONT_COLOR:GetRGB());
+	else
+		GameTooltip:AddLine("Click to allow potentially outdated data.", GREEN_FONT_COLOR:GetRGB());
+	end
+	GameTooltip:Show();
+end
+
 
 -------------------------------------------------
 -- TAV_ListButtonMixin
@@ -654,16 +722,29 @@ function TAV_AtlasFrameMixin:OnEnter()
 	local offsetX = max(0, self:GetRight() - TAV_DisplayContainer:GetRight());
 	local offsetY = max(0, self:GetTop() - TAV_DisplayContainer:GetTop());
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -offsetX, -offsetY);
-	GameTooltip:SetText(self.name or "Unknown", 1, 1, 1, nil, true);
+	local display = self.name or "Unknown";
+	if (not self.info or self.info.missing) then
+		display = "|A:services-icon-warning:14:14|a " .. display;
+	end
+	GameTooltip_SetTitle(GameTooltip, display, nil, true);
 	GameTooltip:Show();
 	self:GetParent():GetParent().mousedOverFrame = self;
 	self:SetBorderHighlighted(true);
+	
+	if (self.info.missing) then 
+		self.Top:SetVertexColor(RED_FONT_COLOR:GetRGB());
+		self.Bottom:SetVertexColor(RED_FONT_COLOR:GetRGB());
+		self.Left:SetVertexColor(RED_FONT_COLOR:GetRGB());
+		self.Right:SetVertexColor(RED_FONT_COLOR:GetRGB());
+		self.Highlight:SetVertexColor(RED_FONT_COLOR:GetRGB());
+	end
 end
 
 function TAV_AtlasFrameMixin:OnLeave()
 	GameTooltip:Hide();
 	self:GetParent():GetParent().mousedOverFrame = nil;
 	self:SetBorderHighlighted(self.shouldHighlight);
+	self:UpdateColor();
 end
 
 function TAV_AtlasFrameMixin:OnDragStart()
@@ -676,14 +757,35 @@ end
 
 function TAV_AtlasFrameMixin:UpdateColor()
 	local color = HIGHLIGHT_FONT_COLOR;
+	local colorOverlay = HIGHLIGHT_FONT_COLOR;
+	-- issue gets red border
+	if (self.info.missing) then
+		color = RED_FONT_COLOR;
+	end
+	
 	self.shouldHighlight = false;
 	if(self.name == TAV_DisplayContainer.selectedAtlas) then
 		color = YELLOW_FONT_COLOR;
 		self.shouldHighlight = true;
+		
+		if (self.info.missing) then
+		color = RED_FONT_COLOR;
+		
+	end
 	elseif (TAV_DisplayContainer:NameMatchesCurrentSearch(self.name)) then
 		color = GREEN_FONT_COLOR;
 		self.shouldHighlight = true;
 	end
+	
+	---- issue always shows red overlay
+	--if (self.info.missing) then
+	--	colorOverlay = RED_FONT_COLOR;
+	--	
+	--	-- issue border overtakes selected color
+	--	if (self.name == TAV_DisplayContainer.selectedAtlas) then
+	--		color = RED_FONT_COLOR;
+	--	end
+	--end
 
 	self:SetBorderHighlighted(self.shouldHighlight);
 	self.Top:SetVertexColor(color:GetRGB());

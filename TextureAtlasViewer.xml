@@ -635,32 +635,50 @@
 								</Frames>
 							</Frame>
 							
-							<Frame parentKey="AlertIndicator" frameLevel="10" hidden="true">
+							<Button parentKey="AlertIndicator" frameLevel="10" hidden="true">
 								<Size x="40" y="36"/>
 								<Anchors>
-									<Anchor point="BOTTOMLEFT" relativeKey="$parent.ControlsPanel" relativePoint="TOPLEFT" x="1" y="1"/>
+									<Anchor point="BOTTOMLEFT" relativeKey="$parent.ControlsPanel" relativePoint="TOPLEFT" x="3" y="0"/>
 								</Anchors>
-									<Layers>
+								<Layers>
 									<Layer level="BACKGROUND">
 										<Texture parentKey="Icon" atlas="services-icon-warning">
+											<Size x="40" y="36"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+										</Texture>
+									</Layer>
+									<Layer level="HIGHLIGHT">
+										<Texture parentKey="Highlight" atlas="services-icon-warning" alphaMode="ADD" alpha="0.5" >
+											<Size x="40" y="36"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
 										</Texture>
 									</Layer>
 								</Layers>
 								<Scripts>
 									<OnEnter>
-										GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-										GameTooltip:SetText("Data issues", 1, 1, 1, nil, true);
-										for k, issue in ipairs(self.dataIssues) do
-											GameTooltip:AddLine(issue);
-										end
-										GameTooltip:AddLine("Your data might be outdated or the generated data is incorrect.", 1, 0.3, 0.3);
-										GameTooltip:Show();
+										self:GetParent():AlertIndicatorOnEnter();
 									</OnEnter>
 									<OnLeave>
 										GameTooltip:Hide();
 									</OnLeave>
+									<OnClick>
+										PlaySound(857);
+										self:GetParent():ToggleIssueDisplay();
+									</OnClick>
+									<OnMouseDown>
+										self.Icon:SetPoint("CENTER", -1, -1);
+										self.Highlight:SetPoint("CENTER", -1, -1);
+									</OnMouseDown>
+									<OnMouseUp>
+										self.Icon:SetPoint("CENTER", 0, 0);
+										self.Highlight:SetPoint("CENTER", 0, 0);
+									</OnMouseUp>
 								</Scripts>
-							</Frame>
+							</Button>
 							
 							<Frame name="TAV_InfoPanel" parentKey="InfoPanel" frameLevel="10" hidden="true" mixin="BackdropTemplateMixin">
 								<Size x="210" y="215"/>
@@ -767,6 +785,29 @@
 											<Anchor point="LEFT" relativeKey="$parent.Right"/>
 										</Anchors>
 									</EditBox>
+									
+									<Frame parentKey="AlertIndicator" hidden="true">
+										<Size x="14" y="14"/>
+										<Anchors>
+											<Anchor point="RIGHT" relativeKey="$parent.CloseButton" relativePoint="LEFT" x="-5" y="-2"/>
+										</Anchors>
+										<Layers>
+											<Layer level="BACKGROUND">
+												<Texture parentKey="Icon" atlas="services-icon-warning">
+												</Texture>
+											</Layer>
+										</Layers>
+										<Scripts>
+											<OnEnter>
+												GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+												GameTooltip_SetTitle(GameTooltip, "Potentially incorrect info.");
+												GameTooltip:Show();
+											</OnEnter>
+											<OnLeave>
+												GameTooltip:Hide();
+											</OnLeave>
+										</Scripts>
+									</Frame>
 								</Frames>
 								
 								<Layers>
