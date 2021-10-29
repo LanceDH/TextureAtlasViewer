@@ -1,0 +1,23 @@
+{
+    "Lua.diagnostics.globals": [
+        "TAV_InfoPanel",
+        "TAV_ControlsPanel",
+        "PERCENTAGE_STRING",
+        "OpenColorPicker",
+        "TAV_DisplayContainer",
+        "TAV_ScrollFrame",
+        "TAV_CoreFrame",
+        "CreateFramePool",
+        "ColorPickerFrame",
+        "OpacitySliderFrame",
+        "HybridScrollFrame_GetOffset",
+        "HybridScrollFrame_GetButtons",
+        "HybridScrollFrame_SetDoNotHideScrollBar",
+        "HybridScrollFrame_CreateButtons",
+        "HybridScrollFrame_Update",
+        "GetAtlasInfo",
+        "TAV_ScrollFrameScrollChild",
+        "LibStub",
+        "GameTooltip_SetTitle"
+    ]
+}
