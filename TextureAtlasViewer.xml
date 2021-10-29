@@ -21,7 +21,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString parentKey="Label" inherits="GameFontWhiteSmall" height="9" justifyH="LEFT" text="Unknown" hidden="true">
+				<FontString parentKey="Label" inherits="GameFontWhiteSmall" justifyH="LEFT" text="Unknown" hidden="true">
 					<Size y="15" />
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
