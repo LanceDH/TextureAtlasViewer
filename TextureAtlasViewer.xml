@@ -681,7 +681,7 @@
 							</Button>
 							
 							<Frame name="TAV_InfoPanel" parentKey="InfoPanel" frameLevel="10" hidden="true" mixin="BackdropTemplateMixin">
-								<Size x="210" y="215"/>
+								<Size x="360" y="195"/>
 								<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 									<EdgeSize>
 										<AbsValue val="16"/>
@@ -721,69 +721,104 @@
 											</OnClick>
 										</Scripts>
 									</Button>
+
+									<!--Full XML/Lua commands for easy copy & paste-->
+									<EditBox parentKey="XML" inherits="TAV_CopyBoxTemplate">
+										<KeyValues>
+											<KeyValue key="label" value="XML Code" type="string"/>
+										</KeyValues>
+										<Anchors>
+											<Anchor point="BOTTOMLEFT" x="15" y="30"/>
+											<Anchor point="RIGHT" x="-10"/>
+										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
+									</EditBox>
+									<EditBox parentKey="Lua" inherits="TAV_CopyBoxTemplate">
+										<KeyValues>
+											<KeyValue key="label" value="Lua Code" type="string"/>
+										</KeyValues>
+										<Anchors>
+											<Anchor point="BOTTOMLEFT" relativeKey="$parent.XML" relativePoint="TOPLEFT" y="20"/>
+											<Anchor point="RIGHT" relativeKey="$parent.XML"/>
+										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
+									</EditBox>
+									<Frame parentKey="infoAnchor">
+										<Anchors>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Lua" relativePoint="TOP"/>
+											<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Lua"/>
+										</Anchors>
+									</Frame>
 								
 									<EditBox parentKey="Name" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Atlas Name" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="15" y="190"/>
-											<Anchor point="RIGHT" x="-10"/>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Lua" relativePoint="TOPLEFT" y="80"/>
+											<Anchor point="RIGHT" relativeKey="$parent.Lua" relativePoint="TOP" x="-10"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									<EditBox parentKey="Width" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Width" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPLEFT" relativeKey="$parent.Name" relativePoint="BOTTOMLEFT" y="-20"/>
-											<Anchor point="RIGHT" relativeKey="$parent.Name" relativePoint="BOTTOM" x="-5"/>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Name" relativePoint="TOPRIGHT" x="10"/>
+											<Anchor point="RIGHT" relativeKey="$parent.infoAnchor" relativePoint="TOP" x="-5"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									<EditBox parentKey="Height" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Height" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeKey="$parent.Name" relativePoint="BOTTOMRIGHT" y="-20"/>
-											<Anchor point="LEFT" relativeKey="$parent.Name" relativePoint="BOTTOM" x="5"/>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Width" relativePoint="TOPRIGHT" x="10"/>
+											<Anchor point="RIGHT" relativeKey="$parent.infoAnchor"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									<EditBox parentKey="Left" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Left" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPLEFT" relativeKey="$parent.Width" relativePoint="BOTTOMLEFT" y="-20"/>
-											<Anchor point="RIGHT" relativeKey="$parent.Width"/>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Name" relativePoint="BOTTOMLEFT" y="-20"/>
+											<Anchor point="RIGHT" relativeKey="$parent.Name" relativePoint="BOTTOM" x="-10"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									<EditBox parentKey="Right" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Right" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeKey="$parent.Height" relativePoint="BOTTOMRIGHT" y="-20"/>
-											<Anchor point="LEFT" relativeKey="$parent.Height"/>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT" x="10"/>
+											<Anchor point="RIGHT" relativeKey="$parent.Name"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									<EditBox parentKey="Top" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Top" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="BOTTOMLEFT" y="-20"/>
-											<Anchor point="RIGHT" relativeKey="$parent.Left"/>
+											<Anchor point="TOPLEFT" relativeKey="$parent.Width" relativePoint="BOTTOMLEFT" y="-20"/>
+											<Anchor point="RIGHT" relativeKey="$parent.Width"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									<EditBox parentKey="Bottom" inherits="TAV_CopyBoxTemplate">
 										<KeyValues>
 											<KeyValue key="label" value="Bottom" type="string"/>
 										</KeyValues>
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMRIGHT" y="-20"/>
-											<Anchor point="LEFT" relativeKey="$parent.Right"/>
+											<Anchor point="TOPRIGHT" relativeKey="$parent.Height" relativePoint="BOTTOMRIGHT" y="-20"/>
+											<Anchor point="LEFT" relativeKey="$parent.Height"/>
 										</Anchors>
+										<FontString inherits="ChatFontSmall"/>
 									</EditBox>
 									
 									<Frame parentKey="AlertIndicator" hidden="true">
@@ -815,32 +850,32 @@
 										<FontString parentKey="Tiling" inherits="GameFontWhiteSmall" justifyH="LEFT" text="Tiling:">
 											<Size y="15" />
 											<Anchors>
-												<Anchor point="TOPLEFT" relativeKey="$parent.Top" relativePoint="BOTTOMLEFT" y="-5"/>
+												<Anchor point="TOPLEFT" relativeKey="$parent.XML" relativePoint="BOTTOMLEFT" y="-5"/>
 											</Anchors>
 										</FontString>
 										<Texture parentKey="IconHorizontalTile" atlas="communities-icon-redx">
 											<Size x="13" y="13"/>
 											<Anchors>
-												<Anchor point="TOPLEFT" relativeKey="$parent.Tiling" relativePoint="BOTTOMLEFT" y="-5"/>
+												<Anchor point="LEFT" relativeKey="$parent.Tiling" relativePoint="RIGHT" x="10"/>
 											</Anchors>
 										</Texture>
 										<FontString parentKey="Horizontal" inherits="GameFontWhiteSmall" justifyH="LEFT" text="Horizontal">
 											<Size y="15" />
 											<Anchors>
-												<Anchor point="LEFT" relativeKey="$parent.IconHorizontalTile" relativePoint="RIGHT" x="5"/>
+												<Anchor point="LEFT" relativeKey="$parent.IconHorizontalTile" relativePoint="RIGHT" x="3"/>
 											</Anchors>
 										</FontString>
 										<Texture parentKey="IconVerticalTile" atlas="communities-icon-redx">
 											<Size x="13" y="13"/>
 											<Anchors>
-												<Anchor point="LEFT" relativeKey="$parent.Bottom"/>
+												<Anchor point="LEFT" relativeKey="$parent.Horizontal" relativePoint="RIGHT" x="10"/>
 												<Anchor point="TOP" relativeKey="$parent.IconHorizontalTile"/>
 											</Anchors>
 										</Texture>
 										<FontString parentKey="Vertical" inherits="GameFontWhiteSmall" justifyH="LEFT" text="Vertical">
 											<Size y="15" />
 											<Anchors>
-												<Anchor point="LEFT" relativeKey="$parent.IconVerticalTile" relativePoint="RIGHT" x="5"/>
+												<Anchor point="LEFT" relativeKey="$parent.IconVerticalTile" relativePoint="RIGHT" x="3"/>
 											</Anchors>
 										</FontString>
 										

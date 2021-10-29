@@ -591,6 +591,23 @@ function TAV_DisplayContainerMixin:ShowAtlasInfo(name, atlasInfo)
 	TAV_InfoPanel.IconHorizontalTile:SetAtlas(atlasInfo.tilesHorizontally and "ParagonReputation_Checkmark" or "communities-icon-redx");
 	TAV_InfoPanel.IconVerticalTile:SetAtlas(atlasInfo.tilesVertically and "ParagonReputation_Checkmark" or "communities-icon-redx");
 	TAV_InfoPanel.AlertIndicator:SetShown(atlasInfo.missing);
+
+	TAV_InfoPanel.Lua:SetText(string.format(
+		'tex:SetTexCoord(%s, %s, %s, %s)',
+		atlasInfo.leftTexCoord,
+		atlasInfo.rightTexCoord,
+		atlasInfo.topTexCoord,
+		atlasInfo.bottomTexCoord
+	))
+
+	TAV_InfoPanel.XML:SetText(string.format(
+		'<TexCoords left="%s" right="%s" top="%s" bottom="%s"/>',
+		atlasInfo.leftTexCoord,
+		atlasInfo.rightTexCoord,
+		atlasInfo.topTexCoord,
+		atlasInfo.bottomTexCoord
+	))
+
 	TAV_InfoPanel:Show();
 end
 
